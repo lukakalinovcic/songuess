@@ -57,11 +57,12 @@ exports.Chat = function (proxy) {
   this.createRoom = function (roomDescriptor) {
     var name = roomDescriptor.name, room;
     if (that.roomNameExists(name)) {
-      throw "room already exists";
+      return {success: false, msg: "Room already exists"};
     }
     room = new ChatRoom(roomDescriptor, that, proxy);
     rooms[name] = room;
     console.log("new room created " + name);
+    return {success: true};
   };
 
   // when client requests moving to another room.
@@ -106,8 +107,7 @@ exports.Chat = function (proxy) {
       bio = true;
     });
     wsock.onMessageType("create_room", function (data) {
-      that.createRoom(data.room);
-      wsock.sendType("create_room", true);
+      wsock.sendType("create_room", that.createRoom(data.room));
     });
   };
 

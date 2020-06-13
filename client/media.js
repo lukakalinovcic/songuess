@@ -9,16 +9,16 @@ function Media(wsock, onFatal) {
     ui.showDialog(name);
   };
 
-  this.handleNewRoom = function (room) {
+  this.handleNewRoom = function (room, err) {
     wsock.sendType("create_room", {
       room : room
     });
     wsock.onMessage("create_room", function (data) {
-      if (data === true) {
+      if (data.success === true) {
         ui.hideDialog();
         onFinish(room.name);
       } else {
-        onFatal("unknown error while creating room.");
+        err("Couldn't create the room: " + data.msg);
       }
     });
   };

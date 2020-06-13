@@ -9,6 +9,8 @@ function MediaUI(media) {
         name : $("#name").val(),
         desc : $("#desc").val(),
         streamFromMiddle : $("#stream_from_middle").prop('checked')
+      }, function (err) {
+        alert(err);
       });
       return false;
     });
