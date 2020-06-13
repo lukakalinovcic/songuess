@@ -95,7 +95,7 @@ function Chat(wsock, user, media, player, onFatal) {
   function roomNameOk(name) {
     return name
       && name.indexOf(" ") === -1
-      && name[0] === "#";
+      && name.length > 0;
   }
 
   // copies score value from client to every other client that shares pid with
@@ -265,6 +265,9 @@ function Chat(wsock, user, media, player, onFatal) {
   onCommand("join", function (room) {
     if (!roomNameOk(room)) {
       return ui.addNotice("Room name not valid.", "err");
+    }
+    if (room[0] !== '#') {
+      room = '#' + room;
     }
     wsock.onError(1, function (err) {
       media.newRoomDialog(room, function (room) {

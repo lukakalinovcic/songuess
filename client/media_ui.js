@@ -5,8 +5,16 @@ function MediaUI(media) {
 
   function initialize() {
     $(".media form").submit(function () {
+      let roomName = $("#name").val();
+      if (roomName.length < 1) {
+        alert("Room name can't be empty");
+        return false;
+      }
+      if (roomName[0] !== '#') {
+        roomName = '#' + roomName;
+      }
       media.handleNewRoom({
-        name : $("#name").val(),
+        name : roomName,
         desc : $("#desc").val(),
         streamFromMiddle : $("#stream_from_middle").prop('checked')
       }, function (err) {
@@ -25,10 +33,13 @@ function MediaUI(media) {
   }
 
   this.showDialog = function (name) {
+    if (name === '#newRoom') {
+      name = "";
+    }
     $(".layout.chat").hide();
     $(".layout.media").show();
-    $("#name").val(name);
-    $("#desc").val("").focus();
+    $("#desc").val("");
+    $("#name").val(name).focus();
   }
 
   this.hideDialog = function () {

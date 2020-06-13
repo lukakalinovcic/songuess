@@ -56,6 +56,12 @@ exports.Chat = function (proxy) {
   // Add room to a list of rooms.
   this.createRoom = function (roomDescriptor) {
     var name = roomDescriptor.name, room;
+    if (name.length < 1) {
+      return {success: false, msg: "Room name can't be empty"};
+    }
+    if (name === "#newRoom") {
+      return {success: false, msg: "#newRoom is a specially reserved name"};
+    }
     if (that.roomNameExists(name)) {
       return {success: false, msg: "Room already exists"};
     }
