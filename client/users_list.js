@@ -31,7 +31,7 @@ function GroupedUsersList(chat, listElement) {
     // returns client with this id only if it's in a group group.
     this.getClient = function (id) {
       var sol;
-      if (score === null) throw "call refresh firstly";
+      if (score === null) throw "call refresh first";
       if (id < size) {
         sol = chat.getClient(ids[id]);
       } else {
@@ -44,12 +44,12 @@ function GroupedUsersList(chat, listElement) {
     };
     // returns number of clients in group group
     this.getNumberOfClients = function () {
-      if (score === null) throw "call refresh firstly";
+      if (score === null) throw "call refresh first";
       return size;
     };
     // only after getNumberOfClients is called!
     this.getScore = function () {
-      if (score === null) throw "call refresh firstly";
+      if (score === null) throw "call refresh first";
       return score;
     };
   };

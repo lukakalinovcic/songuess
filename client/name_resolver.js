@@ -2,7 +2,7 @@
  *
  *  clear() -> clears everything
  *  add(id, name) -> adds (id, name) pair to structure
- *  remove(id) -> pops a di from structure
+ *  remove(id) -> pops the id from structure
  *  display(id) -> generates distinguishable name for this acc
  *  whois(name_fragment) -> returns id of account with this name (or throws)
  *  whoisSilent(name_fragment) -> returns id of account with this name or null
@@ -153,17 +153,3 @@ function NameResolver() {
     nameArray = {};
   };
 }
-
-(function() {
-  var nr = new NameResolver();
-  nr.add("1", 'Anton Grbin');
-  nr.add("2", 'Tomislav Grbin');
-  nr.add("1050245385503464203080.5", "Doroteja Gudlek");
-  nr.add("4", 'Tomislav Gudlek');
-
-  nr.rebuildDisplay();
-  console.log(nr.display("1050245385503464203080.5"));
-  console.log(nr.display("1"));
-  console.log(nr.display("2"));
-  console.log(nr.display("4"));
-});
