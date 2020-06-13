@@ -198,7 +198,7 @@ exports.ChatRoom = function (desc, chat, proxy) {
     for (let i = 0; i < word.length; ++i) {
       // If this was a vowel, bring it back from the original string.
       if (/[aeiouäëöü]/.test(word[i])) {
-        hint[i] = word[i];
+        hint = hint.substring(0, i) + word[i] + hint.substring(i + 1);
       }
     }
     return hint;
