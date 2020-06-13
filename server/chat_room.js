@@ -30,8 +30,8 @@ exports.ChatRoom = function (desc, chat, proxy) {
       songStart : null,
       lastSong : null,
       lastScore : null,
-      nextVotes : null,
-      whoNextVotes : null,
+      idkVotes : null,
+      whoIdkVotes : null,
       hintShowed : null
     };
 
@@ -74,8 +74,8 @@ exports.ChatRoom = function (desc, chat, proxy) {
 
       setTimeout(function() {
         roomState.state = "playing";
-        roomState.nextVotes = 0;
-        roomState.whoNextVotes = {};
+        roomState.idkVotes = 0;
+        roomState.whoIdkVotes = {};
         roomState.hintShowed = false;
       }, Math.max(0, startTime - clock.clock()));
     });
@@ -209,16 +209,9 @@ exports.ChatRoom = function (desc, chat, proxy) {
     return words.map(w => calcWordHint(w)).join(' ');
   }
 
-  function onIDontKnow(data, client) {
-    if (roomState.state !== "playing" && roomState.state !== "playon") {
-      return;
-    }
-    if (roomState.whoNextVotes.hasOwnProperty(client.id())) {
-      return;
-    }
-    roomState.whoNextVotes[client.id()] = 1;
-    ++roomState.nextVotes;
-    if (roomState.nextVotes >= 1 + Math.floor(numberOfClients / 2)) {
+  // Returns whether the majority was reached.
+  function checkForIdkVoteMajority(data, client) {
+    if (roomState.idkVotes >= 1 + Math.floor(numberOfClients / 2)) {
       if (roomState.hintShowed === false) {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
@@ -229,8 +222,8 @@ exports.ChatRoom = function (desc, chat, proxy) {
         roomState.hintShowed = true;
         // Reset the voting. We want another majority in order to skip the song
         // after the hint was displayed.
-        roomState.whoNextVotes = {};
-        roomState.nextVotes = 0;
+        roomState.whoIdkVotes = {};
+        roomState.idkVotes = 0;
       } else {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
@@ -241,7 +234,26 @@ exports.ChatRoom = function (desc, chat, proxy) {
         roomState.lastScore = null;
         playNext();
       }
+      return true;
     } else {
+      return false;
+    }
+  }
+
+  function onIDontKnow(data, client) {
+    // Ignore this if nothing is playing currently.
+    if (roomState.state !== "playing" && roomState.state !== "playon") {
+      return;
+    }
+    // Ignore if the person already voted.
+    if (roomState.whoIdkVotes.hasOwnProperty(client.id())) {
+      return;
+    }
+    // Mark the vote.
+    roomState.whoIdkVotes[client.id()] = 1;
+    ++roomState.idkVotes;
+    // Let the others know.
+    if (!checkForIdkVoteMajority(data, client)) {
       that.broadcast('called_i_dont_know', {
         who: client.id(),
         when : data.when
@@ -402,6 +414,15 @@ exports.ChatRoom = function (desc, chat, proxy) {
   // notify all other clients about the popping :)
   this.leave = function (client, reason) {
     numberOfClients--;
+
+    // Pull this person's /idk vote back.
+    if (roomState.whoIdkVotes.hasOwnProperty(client.id())) {
+      delete roomState.whoIdkVotes[client.id()];
+      --roomState.idkVotes;
+    }
+    // Re-evaluate if we now have the majority for triggering an /idk event.
+    checkForIdkVoteMajority({when: clock.clock()}, client);
+
     client.local('num', client.local('num') - 1);
     delete clients[client.id()];
     if (numberOfClients == 0) {
