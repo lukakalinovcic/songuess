@@ -278,13 +278,13 @@ var Player = function(getTime, volumeElement, onFatal) {
       if (firstHostChunkStartTime < 0) {
         // This case is possible when a client joins after the song has been
         // playing for a while.
-        // bufferSource.start complains in this case, so we start at 0 and use
-        // an appropriate offset instead.
-        // TODO explain why this acTime offset is needed, I also don't get it
-        // currently :)
+        // bufferSource.start complains at negative start times, so we start at
+        // 0 and use the appropriate offset.
+        bufferSource.start(0, acTime - firstHostChunkStartTime);
         console.log('negative first chunk, acTime and startTime are',
           acTime, firstHostChunkStartTime);
-        bufferSource.start(0, acTime - firstHostChunkStartTime);
+        playPauseGain.gain.value = 1e-5;
+        playPauseGain.gain.exponentialRampToValueAtTime(1, acTime + 3);
       } else {
         bufferSource.start(firstHostChunkStartTime);
       }
