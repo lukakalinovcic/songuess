@@ -181,9 +181,9 @@ function ChatUI(chat, user) {
     }
   };
 
-  this.announceSong = function (when) {
+  this.announceSong = function () {
     entry("sys", "");
-    entry("sys relative", " Get ready!"); // poseban
+    entry("sys relative", " Get ready!");
   };
 
   this.addMessage = function (msg) {

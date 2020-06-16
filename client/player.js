@@ -86,7 +86,6 @@ var Player = function(getTime, volumeElement, onFatal) {
       );
     }
     maxScheduledPoint = 0;
-    timeOffset = null;
   };
 
   this.getMuted = function () {
@@ -191,27 +190,13 @@ var Player = function(getTime, volumeElement, onFatal) {
     currentHostChunkGain = null;
   };
 
-  // transponseTime transponses server time to the audioContext's time.
-  // it will return -1 if audioContext is not ready yet.
+  // transponseTime transponses server time to the audioContext time.
   //
-  // timeOffset is calculated only once because we want audioContext's time to
-  // be in charge for scheduling completely. myClock is used only for
-  // synchronization with server.
-  // audioContext.currentTime is sleeping on zero for some time so we must
-  // check this explicitly. 
+  // This is important when scheduling the first chunk, the time the server
+  // thinks the song will start (when Get Ready -3sec is displayed)
+  // should match the audioContext time.
   function transponseTime(serverTime) {
-    if (timeOffset === null && audioContext.currentTime > 0) {
-      timeOffset = (getTime() / 1000) - audioContext.currentTime;
-    }
-    console.log('old, current time offset:',
-      timeOffset,
-      (getTime() / 1000) - audioContext.currentTime
-    );
-    if (timeOffset !== null) {
-      return (serverTime / 1000) - timeOffset;
-    } else {
-      return null;
-    }
+    return serverTime / 1000 - (getTime() / 1000 - audioContext.currentTime);
   }
 
   function firstHostChunkAlreadyScheduled() {
@@ -227,7 +212,6 @@ var Player = function(getTime, volumeElement, onFatal) {
 
     // We don't know when to schedule the first chunk, nothing to do.
     if (!firstChunkScheduled && nextSongStart === null) {
-      console.log('SHOULD NEVER HAPPEN');
       return;
     }
 

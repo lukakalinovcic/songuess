@@ -340,7 +340,7 @@ function Chat(wsock, user, media, player, onFatal) {
     player.setNextSongStart(state.songStart);
     clearTimeout(announceTimer);
     announceTimer = setTimeout(function () {
-      ui.announceSong(when);
+      ui.announceSong();
       announceTimer = setTimeout(function () {
         player.play();
         roomState.state = "playing";
