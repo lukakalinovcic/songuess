@@ -203,6 +203,10 @@ var Player = function(getTime, volumeElement, onFatal) {
     if (timeOffset === null && audioContext.currentTime > 0) {
       timeOffset = (getTime() / 1000) - audioContext.currentTime;
     }
+    console.log('old, current time offset:',
+      timeOffset,
+      (getTime() / 1000) - audioContext.currentTime
+    );
     if (timeOffset !== null) {
       return (serverTime / 1000) - timeOffset;
     } else {
