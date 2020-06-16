@@ -399,7 +399,8 @@ exports.ChatRoom = function (desc, chat, proxy) {
     numberOfClients--;
 
     // Pull this person's /idk vote back.
-    if (roomState.whoIdkVotes.hasOwnProperty(client.id())) {
+    if (roomState.whoIdkVotes &&
+        roomState.whoIdkVotes.hasOwnProperty(client.id())) {
       delete roomState.whoIdkVotes[client.id()];
       --roomState.idkVotes;
     }
