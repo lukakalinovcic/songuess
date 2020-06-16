@@ -25,7 +25,6 @@ var Player = function(getTime, volumeElement, onFatal) {
     , audioContext = null
     , masterGain = null
     , playPauseGain = null
-    , sonicBeepGain = null
     , oscillator = null
     , playEnabled = true
     , timeOffset = null
@@ -57,14 +56,12 @@ var Player = function(getTime, volumeElement, onFatal) {
     else warmUpCalled = true;
     // set up master gain
     masterGain = audioContext.createGain();
-    sonicBeepGain = audioContext.createGain();
     playPauseGain = audioContext.createGain();
     // initial volume is 0.5
     masterGain.gain.value = 0.5;
     masterGain.connect(playPauseGain);
     playPauseGain.connect(audioContext.destination);
     playPauseGain.gain.setValueAtTime(1, 0);
-    sonicBeepGain.connect(audioContext.destination);
     // volumeElement can be null.
     if (volumeElement) {
       volumeElement.style.display = 'block';
@@ -77,21 +74,6 @@ var Player = function(getTime, volumeElement, onFatal) {
   this.getAudioContext = function() {
     return audioContext;
   };
-
-  /**
-   * when and duration in ms.
-   */
-  this.sonicBeep = function(when, freq, duration) {
-    var avoidClick = 0.002, g = sonicBeepGain;
-    when = transponseTime(when);
-    // set the freq
-    oscillator.frequency.setValueAtTime(freq, when);
-    g.gain.linearRampToValueAtTime(0, when - avoidClick/2);
-    g.gain.linearRampToValueAtTime(1, when + avoidClick/2);
-    when += duration / 1000;
-    g.gain.linearRampToValueAtTime(1, when - avoidClick/2);
-    g.gain.linearRampToValueAtTime(0, when + avoidClick/2);
-  }
 
   // this will work only for future scheduled chunks.
   // it will mute everything that is already scheduled to avoid double play.

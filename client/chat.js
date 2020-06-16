@@ -25,7 +25,6 @@ function Chat(wsock, user, media, player, onFatal) {
     ids = [],
     pids = [],
     announceTimer,
-    sonicSyncer = null,
     roomDescription = null,
     roomState = {
       state : "dead",
@@ -175,45 +174,6 @@ function Chat(wsock, user, media, player, onFatal) {
       {when: myClock.clock(), fixed_item: fixed_item});
   });
 
-  wsock.onMessage("sbeep", function (msg) {
-    player.sonicBeep(msg.when, msg.freq, msg.duration);
-    ui.addNotice("received sonic beep request.");
-  });
-
-  wsock.onMessage("sskew", function (msg) {
-    var offset = msg.offset;
-    myClock.skew(offset);
-    player.resync(offset > 1000);
-    if (offset > 0) {
-      ui.addNotice(
-        "Clock changed due to sonic sync: "
-        + Math.round(offset*100)/100 + " ms."
-      );
-    }
-  });
-
-  onCommand("ssync", function () {
-    if (sonicSyncer) {
-      sonicSyncer.abort();
-    }
-    sonicSyncer = new SonicSyncer(
-      myClock.clock,
-      player.getAudioContext(),
-      function getClients() {
-        var ids = {};
-        for (var id in clients) {
-          if (id != user.id) {
-            ids[id] = id;
-          }
-        }
-        return ids;
-      },
-      function sendBeep(msg) {wsock.sendType("sbeep", msg);},
-      function sendSkew(msg) {wsock.sendType("sskew", msg);},
-      function log(msg) {ui.addNotice(msg);}
-    );
-  });
-
   onCommand("desc", function () {
     ui.displayRoomDescription(roomDescription);
   });
@@ -233,7 +193,7 @@ function Chat(wsock, user, media, player, onFatal) {
   }
 
   onCommand("sync", function () {
-    ui.addNotice("sync is deprecated");
+    // ui.addNotice("sync is deprecated");
     wsock.sendType("sync_start", {});
     new Syncer(
       new SyncSocketWrap(wsock),
