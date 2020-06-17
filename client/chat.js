@@ -193,7 +193,6 @@ function Chat(wsock, user, media, player, onFatal) {
   }
 
   onCommand("sync", function () {
-    // ui.addNotice("sync is deprecated");
     wsock.sendType("sync_start", {});
     new Syncer(
       new SyncSocketWrap(wsock),
