@@ -81,11 +81,13 @@ exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHand
             // now's the time to clear the host chunks in the client app
             chatRoom.broadcast('clear_host_chunks');
 
+            // Clear the server audio data.
             clearAudioData();
 
-            // this should not be called before clients cleared the chunks
-            // TODO this is not currently guaranteed, the extension could get
-            // the message before the songuess clients
+            // Tell the extension to start playing.
+            // The extension will start sending chunks, which again go through
+            // this server. So it's not possible for a chunk to arrive before
+            // the clients executed the clear_host_chunks command above.
             sendCommand('startPlaying');
           } else {
             if (doneHandler !== null) {
