@@ -93,7 +93,7 @@ var pretty = {
       .addClass("full-client")
       .attr('id', client.id)
       .css({color: pretty.colorStyle(client.id)})
-      .text(client.nsdisp)
+      .text(client.display)
       .append($("<span>").text(client.score))[0]
       .outerHTML;
   },

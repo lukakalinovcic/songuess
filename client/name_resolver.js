@@ -5,7 +5,6 @@
  *  remove(id) -> pops the id from structure
  *  display(id) -> generates distinguishable name for this acc
  *  whois(name_fragment) -> returns id of account with this name (or throws)
- *  whoisSilent(name_fragment) -> returns id of account with this name or null
  */
 function NameResolver() {
   var
@@ -62,44 +61,10 @@ function NameResolver() {
     return null;
   }
 
-  function partitiveSet(arr) {
-    var x, y, sol = [], tmp;
-    for (x = 1; x < (1 << Math.min(arr.length, 5)); ++x) {
-      tmp = []; 
-      for (y = 0; y < arr.length; ++y) {
-        if (x & (1 << y)) {
-          tmp.push(arr[y]);
-        }
-      }
-      sol.push(tmp);
-    }
-    return sol;
-  }
-
   function rebuildDisplay() {
-    var id, sol, i, j, part_map = {}, part_arr, part, solution = {};
     for (id in nameArrs) {
-      solution[id] = {};
-      part_arr = partitiveSet(nameArrs[id]);
-      for (j = 0; j < part_arr.length; ++j) {
-        part = part_arr[j].join(" ");
-        if (part_map.hasOwnProperty(part)) {
-          delete solution[ part_map[part] ][part];
-        } else {
-          solution[id][part] = 1;
-        }
-        part_map[part] = id;
-      }
+      displayMemo[id] = nameArrs[id][0];
     } 
-    for (id in solution) {
-      sol = false; j = 1e9;
-      for (part in solution[id]) {
-        if (part.length < j) {
-          j = part.length; sol = part;
-        }
-      }
-      displayMemo[id] = sol || nameArrs[id].join(" ");
-    }
   }
 
   this.add = function (id, name) {
@@ -136,14 +101,6 @@ function NameResolver() {
       }
     }
     throw "no matches";
-  };
-
-  this.whoisSilent = function (name) {
-    try {
-      return that.resolve(name);
-    } catch (err) {
-      return null;
-    }
   };
 
   this.clear = function () {
