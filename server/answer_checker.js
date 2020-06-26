@@ -4,7 +4,7 @@
 module.exports = function (options) {
   var
     MISTAKES_BY_CHAR = 1.0/6, // on 6 chars you may mistype one.
-    nonAlphanum = /[^a-zA-Z0-9šđčćžžáàâäãæéèêëíîïóôöœúùûüñç ]/g,
+    nonAlphanum = /[^a-zA-Z0-9šđčćžžáàâäãæéèêëíîïóôöœúùûüñçß ]/g,
     mulSpace = /  +/g,
     trimSpace = /^ | $/g,
     trimHashtag = /\#([^ ]+)/g,
@@ -19,7 +19,6 @@ module.exports = function (options) {
       ['á', 'a'],
       ['à', 'a'],
       ['â', 'a'],
-      ['ä', 'a'],
       ['ã', 'a'],
       ['æ', 'ae'],
       ['é', 'e'],
@@ -31,13 +30,15 @@ module.exports = function (options) {
       ['ï', 'i'],
       ['ó', 'o'],
       ['ô', 'o'],
-      ['ö', 'o'],
       ['œ', 'oe'],
       ['ú', 'u'],
       ['ù', 'u'],
       ['û', 'u'],
-      ['ü', 'u'],
       ['ñ', 'n'],
+      ['ö', 'oe'],
+      ['ü', 'ue'],
+      ['ä', 'ae'],
+      ['ß', 'ss'],
     ];
 
   // O(n^2) hopefully.

@@ -19,11 +19,11 @@ var validPairs = [
   ['madam reve', 'Madame Rêve'],
   ['cest ecrit', 'C\'est Écrit'],
   ['sdjccz','šđčćž'],
-  ['aaaaa','áàâäã'],
+  ['aaaa','áàâã'],
   ['eeee','éèêë'],
   ['iii','íîï'],
-  ['ooo','óôö'],
-  ['uuuu','úùûü'],
+  ['oo','óô'],
+  ['uuu','úùû'],
   ['cnaeoe','çñæœ'],
   ['triptico', 'Tríptico'],
   ['para machucar meu coracao', 'Para Machucar Meu Coração'],
@@ -42,7 +42,7 @@ var validPairs = [
   ['(I Can\'t Get No) Satisfaction (Mono version)', 'satisfaction'],
   ['(I Can\'t Get No) Satisfaction (Mono version)', 'i cant get no satisfaction'],
   ['Everybody (Backstreet\'s back)', 'everybody'],
-  ['Everybody (Backstreet\'s back)', 'backstreet\'s back'],
+  ['Everybody (Backstreet\'s back)', 'backstreets back'],
   ['Corcovado (quiet nights of quiet stars)', 'corcovado'],
   ['Corcovado (quiet nights of quiet stars)', 'quiet nights of quiet stars'],
   ['Dark Horse feat Juicy J', 'dark horse'],
@@ -50,6 +50,10 @@ var validPairs = [
   ['The real slim shady', 'real slim shady'],
   ['L-O-V-E', 'l-o-v-e'],
   ['L-O-V-E', 'l o v e'],
+  ['Schön', 'schoen'],
+  ['Schlüssel', 'schluessel'],
+  ['Zähne', 'zaehne'],
+  ['Straße', 'strasse'],
 ];
 
 var invalidPairs = [
@@ -70,6 +74,7 @@ var invalidPairs = [
   // ['[]', '(...)'],
   // ['(Nice dream)', '()'],
   // ['Neighborhood #1 (Tunnels)', 'Neighborhood #4 (7 Kettles)'],
+  ['Schön', 'Schon'],
 ];
 
 var validPairsFullItems = [
