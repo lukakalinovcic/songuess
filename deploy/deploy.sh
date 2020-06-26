@@ -17,7 +17,7 @@ echo "deploying..";
 if [ -f $root/server/config.override.js ]; then
   mv $root/server/config.override.js $root/server/config.override.js.backup
 fi
-cp $root/deploy/live.config.js $root/server/config.override.js
+cp $root/deploy/config.js $root/server/config.override.js
 
 cp -r $root/server/* /srv/songuess
 # Allow other members of songuess group to deploy.
