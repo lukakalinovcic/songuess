@@ -3,21 +3,19 @@
 
 var
   clock = require('./clock.js'),
-  proxyConfig = require('./config.js').proxy,
   Syncer = require('./syncer.js').Syncer,
-  randomRange = require('./statistics.js').randomRange,
-  AnswerChecker = require('./answer_checker.js'),
+  PointsAssigner = require('./points_assigner.js'),
   mediaAuthenticator = new (require('./auth.js').MediaAuthenticator)(),
   HostSocket = require('./host_socket.js').HostSocket;
 
-exports.ChatRoom = function (desc, chat, proxy) {
+exports.ChatRoom = function (desc, chat) {
 
   var
     that = this,
     clients = {},
     localPersonData = {},
     numberOfClients = 0,
-    answerChecker,
+    pointsAssigner = new PointsAssigner(this),
     currentItem = null,
     hostSocket = null,
 
@@ -114,25 +112,7 @@ exports.ChatRoom = function (desc, chat, proxy) {
     client.desc('local', localPersonData[client.pid()]);
   }
 
-  function grantScore(client) {
-    client.local('score', client.local('score') + 1);
-    // update in-a-row
-    if (roomState.lastScore === client.id()) {
-      client.local('row', client.local('row') + 1);
-    } else {
-      if (clients.hasOwnProperty(roomState.lastScore)) {
-        clients[roomState.lastScore].local('row', 0);
-      }
-      client.local('row', 1);
-    }
-    roomState.lastScore = client.id();
-    if (client.local('row') > 2) {
-      that.broadcast('row', {who:client.id(), row:client.local('row')});
-    }
-  }
-
   function onSay(data, client) {
-    // debug
     if (!clients.hasOwnProperty(data.from)) {
       console.log("internal: from not in this room");
       throw "internal: from not in this room";
@@ -143,29 +123,15 @@ exports.ChatRoom = function (desc, chat, proxy) {
     if (data.to !== null && !clients.hasOwnProperty(data.to)) {
       throw "to specified, but not in this room";
     }
+
+    // TODO dont show the correct answer right away!
     that.broadcast('say', data);
+
     // only if state is playing check for correct answer.
     if (roomState.state !== "playing") {
       return;
     }
-    if (answerChecker.checkAnswer(currentItem, data.what)) {
-      var next_state = "after";
-      grantScore(client);
-      if (data.what.indexOf('#playon') != -1) {
-        next_state = "playon";
-      }
-      that.broadcast('correct_answer', {
-        who: client.id(),
-        answer: currentItem,
-        when : data.when,
-        state : next_state
-      });
-      if (next_state !== "playon") {
-        playNext();
-      } else {
-        roomState.state = next_state;
-      }
-    }
+    pointsAssigner.gotAnswer(data, client, currentItem);
   }
 
   function onNewRoom(data, client) {
@@ -447,7 +413,36 @@ exports.ChatRoom = function (desc, chat, proxy) {
     return numberOfClients == 0;
   };
 
-  (function () {
-    answerChecker = new AnswerChecker({});
-  }());
+  // Called by the pointsAssigner.
+  this.guessingDone = function (playOn) {
+    const next_state = playOn? "playon": "after";
+    roomState.state = next_state;
+
+    that.broadcast('guessing_done', {
+      answer: currentItem,
+      state: next_state
+    });
+
+    if (next_state !== "playon") {
+      playNext();
+    }
+  }
+
+  // Called by the pointsAssigner.
+  this.grantScore = function(client, numPoints) {
+    client.local('score', client.local('score') + numPoints);
+    // For counting streaks (consecutive correct answers).
+    if (roomState.lastScore === client.id()) {
+      client.local('row', client.local('row') + 1);
+    } else {
+      if (clients.hasOwnProperty(roomState.lastScore)) {
+        clients[roomState.lastScore].local('row', 0);
+      }
+      client.local('row', 1);
+    }
+    roomState.lastScore = client.id();
+    if (client.local('row') > 2) {
+      that.broadcast('row', {who:client.id(), row:client.local('row')});
+    }
+  };
 };

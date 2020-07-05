@@ -11,8 +11,9 @@ var
 
 var onHttpRequest,
   httpServer = require('http').createServer(onHttpRequest),
+// TODO: Remove httpproxy.js, it's unused currently.
   proxy = new (require('./httpproxy.js').HttpProxy)(),
-  chat = new (require('./chat.js').Chat)(proxy),
+  chat = new (require('./chat.js').Chat)(),
   server = new ws.Server({server: httpServer}),
   staticServer = new (require('./static_server').Server)();
 

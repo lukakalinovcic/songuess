@@ -156,12 +156,10 @@ function ChatUI(chat, user) {
     entry("sys", desc? desc: "No room description.");
   };
 
-  this.correctAnswer = function (desc) {
-    var client = chat.getClient(desc.who);
+  this.guessingDone = function(data) {
     entry("sys correct",
-      " Well done " + pretty.client(client) +
-      "! The song was " + pretty.song(desc.answer) + "." +
-      (desc.state == "playon" ? " #playon - can't stop." : ""));
+      "Guessing done! The song was " + pretty.song(data.answer) + "." +
+      (data.state == "playon" ? " #playon - can't stop." : ""));
     this.updateList();
   };
 

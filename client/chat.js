@@ -287,16 +287,27 @@ function Chat(wsock, user, media, player, onFatal) {
     ui.updateList();
   });
 
-  // after 3sec's disable player (fade out music)
-  // and disable relative timing.
-  wsock.onMessage("correct_answer", function (data) {
+  wsock.onMessage("correct_title", function (data) {
+    console.log('correct title');
     var client = that.getClient(data.who);
-    ++ client.score;
+    client.score += data.numPoints;
+    copySharedToPidPeers(client);
+  });
+
+  wsock.onMessage("correct_artist", function (data) {
+    console.log('correct artist');
+    // TODO
+  });
+
+  wsock.onMessage("guessing_done", function (data) {
+    console.log('guessing done');
+
+    // TODO
+    // data should contain info about artist points that were given out
     roomState.lastSong = data.answer;
     roomState.state = data.state;
-    copySharedToPidPeers(client);
-    ui.correctAnswer(data);
-    console.log('correct answer');
+
+    ui.guessingDone(data);
   });
 
   wsock.onMessage("honored", function (data) {

@@ -7,7 +7,7 @@ var
   ChatRoom = require("./chat_room.js").ChatRoom,
   ChatClient = require("./chat_client.js").ChatClient;
 
-exports.Chat = function (proxy) {
+exports.Chat = function () {
   var
     that = this,
     rooms = {},
@@ -65,7 +65,7 @@ exports.Chat = function (proxy) {
     if (that.roomNameExists(name)) {
       return {success: false, msg: "Room already exists"};
     }
-    room = new ChatRoom(roomDescriptor, that, proxy);
+    room = new ChatRoom(roomDescriptor, that);
     rooms[name] = room;
     console.log("new room created " + name);
     return {success: true};

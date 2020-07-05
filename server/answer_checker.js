@@ -1,7 +1,7 @@
 /*jslint indent: 2, plusplus: true*/
 "use strict";
 
-module.exports = function (options) {
+module.exports = function () {
   var
     MISTAKES_BY_CHAR = 1.0/6, // on 6 chars you may mistype one.
     nonAlphanum = /[^a-zA-Z0-9šđčćžžáàâäãæéèêëíîïóôöœúùûüñçß ]/g,
