@@ -158,10 +158,17 @@ function ChatUI(chat, user) {
 
   this.correctAnswer = function (desc) {
     var client = chat.getClient(desc.who);
-    entry("sys correct",
-      " Well done " + pretty.client(client) +
-      "! The song was " + pretty.song(desc.answer) + "." +
-      (desc.state == "playon" ? " #playon - can't stop." : ""));
+    if (desc.answer.title.toLowerCase() == 'never gonna give you up') {
+      entry("sys correct",
+        " Well done <a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" target=\"_blank\">" +
+        pretty.client(client) +
+        "</a>! The song was " + pretty.song(desc.answer) + ".");
+    } else {
+      entry("sys correct",
+        " Well done " + pretty.client(client) +
+        "! The song was " + pretty.song(desc.answer) + "." +
+        (desc.state == "playon" ? " #playon - can't stop." : ""));
+    }
     this.updateList();
   };
 
