@@ -8,6 +8,7 @@ module.exports = function (options) {
     mulSpace = /  +/g,
     trimSpace = /^ | $/g,
     trimHashtag = /\#([^ ]+)/g,
+    trimDot = /\./g,
     replacePairs = [
       ['ć', 'c'],
       ['č', 'c'],
@@ -104,6 +105,7 @@ module.exports = function (options) {
     str = str.toString();
     str = str.toLowerCase();
     str = str.replace(trimHashtag, '');
+    str = str.replace(trimDot, '');
     str = str.replace(nonAlphanum, ' ');
     str = str.replace(mulSpace, ' ');
     str = str.replace(trimSpace, '');

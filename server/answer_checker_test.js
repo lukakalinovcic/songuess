@@ -54,6 +54,8 @@ var validPairs = [
   ['Schlüssel', 'schluessel'],
   ['Zähne', 'zaehne'],
   ['Straße', 'strasse'],
+  ['Surfin U.S.A.', 'surfin u.s.a.'],
+  ['Surfin U.S.A.', 'surfin usa'],
 ];
 
 var invalidPairs = [
@@ -68,7 +70,10 @@ var invalidPairs = [
   ['some song (instrumental)', 'instrumental'],
   // Arguable, but the title is really spelled out intentionally.
   ['L-O-V-E', 'love'],
-  // I decided this example to be fine not to accept.
+  // Not sure who would spell it out like this, I'm including it here for
+  // completion because we have it in positive cases above.
+  ['Surfin U.S.A.', 'surfin u s a'],
+  // I decided that this example is fine not to accept.
   // Feels to risky to accept supersets of the correct answer.
   ['Umoran sam', 'umoran sam prijatelju'],
   // ['[]', '(...)'],
