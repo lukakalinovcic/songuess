@@ -156,6 +156,14 @@ function ChatUI(chat, user) {
     entry("sys", desc? desc: "No room description.");
   };
 
+  this.correctArtist = function(who) {
+    entry("sys", pretty.client(chat.getClient(who)) + " got the artist!");
+  }
+
+  this.correctTitle = function(who) {
+    entry("sys", pretty.client(chat.getClient(who)) + " got the title!");
+  }
+
   this.guessingDone = function(data) {
     entry("sys correct",
       "Guessing done! The song was " + pretty.song(data.answer) + "." +

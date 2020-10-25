@@ -288,20 +288,19 @@ function Chat(wsock, user, media, player, onFatal) {
   });
 
   wsock.onMessage("correct_title", function (data) {
-    console.log('correct title');
+    console.log('correct_title', data);
     var client = that.getClient(data.who);
     client.score += data.numPoints;
     copySharedToPidPeers(client);
+
+    ui.correctTitle(data.who);
   });
 
   wsock.onMessage("correct_artist", function (data) {
-    console.log('correct artist');
-    // TODO
+    ui.correctArtist(data.who);
   });
 
   wsock.onMessage("guessing_done", function (data) {
-    console.log('guessing done');
-
     // TODO
     // data should contain info about artist points that were given out
     roomState.lastSong = data.answer;

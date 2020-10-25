@@ -189,7 +189,14 @@ module.exports = function () {
     return true;
   }
 
-  function checkTitle(correct_title, answer) {
+  function consumePrefixOrFalse(big, small) {
+    if (big.substr(0, small.length).toLowerCase() === small.toLowerCase()) {
+      return big.substr(small.length);
+    }
+    return false;
+  }
+
+  this.checkAnswer = function (correct_title, answer) {
     const normalized_answer = normalize(answer);
     for (const correct_answer of generateCorrectAnswers(correct_title)) {
       if (compareNormalizedStrings(normalized_answer, correct_answer)) {
@@ -198,45 +205,4 @@ module.exports = function () {
     }
     return false;
   }
-
-  function consumePrefixOrFalse(big, small) {
-    if (big.substr(0, small.length).toLowerCase() === small.toLowerCase()) {
-      return big.substr(small.length);
-    }
-    return false;
-  }
-
-  // Always returns a string.
-  function maybeStripArtist(title, artist) {
-    if (!artist) {
-      return title;
-    }
-    artist = String(artist)
-    // The song '22' by Taylor Swift for some reason had the Number type as a
-    // title..
-    title = String(title)
-    return consumePrefixOrFalse(title, artist + " -") ||
-      consumePrefixOrFalse(title, artist + " _") ||
-      consumePrefixOrFalse(title, artist + " /") ||
-      title;
-  }
-
-  // playlistItem is dictionary with 'title', 'title2', ... as a member.
-  // answer is a string.
-  this.checkAnswer = function (playlistItem, answer) {
-    if (playlistItem === undefined) {
-      return false;
-    }
-    var key, artist = playlistItem["artist"];
-    // figure out if there is an artist
-    for (key in playlistItem) {
-      // If key has 'title' as a prefix.
-      if (key.substr(0, 5) === "title") {
-        if (checkTitle(maybeStripArtist(playlistItem[key], artist), answer)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
 };

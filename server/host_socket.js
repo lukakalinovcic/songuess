@@ -6,7 +6,7 @@
 exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHandler) {
 
   var doneHandler = null;
-  var fetchedTitle = null;
+  var fetchedItem = null;
 
   // The server keeps the current song in memory, so it can send it all
   // to new clients joining the room.
@@ -35,11 +35,11 @@ exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHand
       return;
     }
 
-    doneHandler = function(title) {
-      if (title) {
-        done(null, {title: title});
+    doneHandler = function(item) {
+      if (item) {
+        done(null, item);
       } else {
-        done('couldn\'t get the title');
+        done('couldn\'t get the item');
       }
 
       doneHandler = null;
@@ -75,7 +75,7 @@ exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHand
           roomReadyHandler();
         } else if (messageType == 'moveToNextSong') {
           if (message.status == 'OK' && message.data.title) {
-            fetchedTitle = message.data.title;
+            fetchedItem = message.data;
 
             // recorder.stop() has been called on the client at this point
             // now's the time to clear the host chunks in the client app
@@ -97,7 +97,7 @@ exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHand
         } else if (messageType == 'startPlaying') {
           if (doneHandler !== null) {
             if (message.status == 'OK') {
-              doneHandler(fetchedTitle);
+              doneHandler(fetchedItem);
             } else {
               doneHandler(null);
             }

@@ -38,7 +38,9 @@ exports.ChatRoom = function (desc, chat) {
       desc : {
         name : desc.name,
         desc : desc.desc,
-        streamFromMiddle: desc.streamFromMiddle
+        streamFromMiddle: desc.streamFromMiddle,
+        maxPoints: desc.maxPoints,
+        artistPoints: desc.artistPoints
       },
       users : {},
       state : roomState
@@ -63,6 +65,7 @@ exports.ChatRoom = function (desc, chat) {
       var startTime = clock.clock() + 8000;
 
       currentItem = nextSongItem;
+      pointsAssigner.init(currentItem);
 
       setTimeout(function() {
         roomState.state = "suspense";
@@ -131,7 +134,7 @@ exports.ChatRoom = function (desc, chat) {
     if (roomState.state !== "playing") {
       return;
     }
-    pointsAssigner.gotAnswer(data, client, currentItem);
+    pointsAssigner.gotAnswer(data, client);
   }
 
   function onNewRoom(data, client) {
