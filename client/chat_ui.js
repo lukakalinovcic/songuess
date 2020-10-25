@@ -158,6 +158,8 @@ function ChatUI(chat, user) {
 
   this.correctArtist = function(who) {
     entry("sys", pretty.client(chat.getClient(who)) + " got the artist!");
+    // TODO add rick roll
+    // " Well done <a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" target=\"_blank\">" +
   }
 
   this.correctTitle = function(who) {

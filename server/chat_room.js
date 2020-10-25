@@ -151,7 +151,7 @@ exports.ChatRoom = function (desc, chat) {
     let hint = word.replace(/[a-z]/g, '.');
     for (let i = 0; i < word.length; ++i) {
       // If this was a vowel, bring it back from the original string.
-      if (/[aeiouäëöü]/.test(word[i])) {
+      if (/[aeiouäëöüy]/.test(word[i])) {
         hint = hint.substring(0, i) + word[i] + hint.substring(i + 1);
       }
     }
