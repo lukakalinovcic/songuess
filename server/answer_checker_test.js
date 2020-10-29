@@ -56,6 +56,15 @@ var validPairs = [
   ['Straße', 'strasse'],
   ['Surfin U.S.A.', 'surfin u.s.a.'],
   ['Surfin U.S.A.', 'surfin usa'],
+  ['Let It Be - Remastered 2009', 'let it be'],
+  ['You Oughta Know - 2015 Remaster', 'you oughta know'],
+  ['Good Vibrations - Remastered', 'good vibrations'],
+  ['Everybody (Backstreet\'s Back) - Radio Edit', 'everybody'],
+  ['Everybody (Backstreet\'s Back) - Radio Edit', 'backstreets back'],
+  ['Stayin\' alive - From "Saturday Night Fever" Soundtrack', 'stayin alive'],
+  ['Lady Marmelade - From "Moulin Rouge" Soundtrack', 'lady marmelade'],
+  ['Stan (feat. Dido)', 'stan'],
+  ['Get Lucky (feat. Pharell Williams) - Radio Edit', 'get lucky'],
 ];
 
 var invalidPairs = [
