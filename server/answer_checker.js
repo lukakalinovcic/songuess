@@ -142,6 +142,12 @@ module.exports = function () {
       answers.push(normalized.substring(4));
     }
 
+    // This is supposed to catch cases like 'Imagine - Radio Edit'.
+    const dash_pos = correct_title.indexOf(' - ');
+    if (dash_pos > 0) {
+      answers.push(normalize(correct_title).substring(0, dash_pos));
+    }
+
     // Example where this is needed is the title 'dark horse feat juicy j'.
     // 'feat ..' parts are usually inside parenthesis, but not in this case.
     const feat_pos = normalized.indexOf(' feat ');

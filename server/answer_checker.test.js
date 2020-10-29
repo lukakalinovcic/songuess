@@ -73,6 +73,20 @@ test('accepted pairs', () => {
   expect(check('Straße', 'strasse')).toBe(true);
   expect(check('Surfin U.S.A.', 'surfin u.s.a.')).toBe(true);
   expect(check('Surfin U.S.A.', 'surfin usa')).toBe(true);
+  expect(check('Let It Be - Remastered 2009', 'let it be')).toBe(true);
+  expect(check('You Oughta Know - 2015 Remaster', 'you oughta know')).toBe(true);
+  expect(check('Good Vibrations - Remastered', 'good vibrations')).toBe(true);
+  expect(check('Everybody (Backstreet\'s Back) - Radio Edit', 'everybody')).toBe(
+    true);
+  expect(check('Everybody (Backstreet\'s Back) - Radio Edit',
+    'backstreets back')).toBe(true);
+  expect(check('Stayin\' alive - From "Saturday Night Fever" Soundtrack',
+    'stayin alive')).toBe(true);
+  expect(check('Lady Marmelade - From "Moulin Rouge" Soundtrack',
+    'lady marmelade')).toBe(true);
+  expect(check('Stan (feat. Dido)', 'stan')).toBe(true);
+  expect(check('Get Lucky (feat. Pharell Williams) - Radio Edit', 'get lucky'))
+    .toBe(true);
 });
 
 test('rejected pairs', () => {
