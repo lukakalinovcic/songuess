@@ -16,7 +16,7 @@ function MediaUI(media) {
       media.handleNewRoom({
         name : roomName,
         desc : $("#desc").val(),
-        streamFromMiddle : $("#stream_from_middle").prop('checked')
+        streamFromMiddle : false
       }, function (err) {
         alert(err);
       });
