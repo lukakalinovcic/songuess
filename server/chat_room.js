@@ -27,6 +27,7 @@ exports.ChatRoom = function (desc, chat) {
       state : "dead",
       songStart : null,
       lastSong : null,
+      // TODO: remove this rampage thing, its complicated with multiple possible correct answers and artist points.
       lastScore : null,
       idkVotes : null,
       whoIdkVotes : null,
@@ -56,6 +57,10 @@ exports.ChatRoom = function (desc, chat) {
   function playNext() {
     if (hostSocket == null) {
       return;
+    }
+
+    if (pointsAssigner) {
+      pointsAssigner.giveAnyRemainingArtistPoints();
     }
 
     roomState.state = "after";

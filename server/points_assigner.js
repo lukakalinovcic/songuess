@@ -50,7 +50,7 @@ module.exports = function (currentItem, chatRoom) {
       // Note that if there are 2 artist winners, the one which would've gotten
       // 1 point can still give a title answer and get 2 points instead of 1,
       // so we can't finish the round.
-      that.finishTheRound();
+      chatRoom.guessingDone(playOn);
     }
   }
 
@@ -91,9 +91,9 @@ module.exports = function (currentItem, chatRoom) {
     return gotTitle || gotArtist;
   };
 
-  // This is called if the song has ended, or if next was called before all the
-  // points were given out.
-  this.finishTheRound = function () {
+  // This should be called externally for example if the song has ended, or if
+  // next was called before/ all the points were given out.
+  this.giveAnyRemainingArtistPoints = function () {
     // Title points have already been awarded.
     let points = maxPoints - titleWinners.length;
     for (const client of artistWinners) {
@@ -101,7 +101,8 @@ module.exports = function (currentItem, chatRoom) {
         chatRoom.grantScore(client, points--, /*artistScore=*/true);
       }
     }
-    chatRoom.guessingDone(playOn);
+    // Just in case this is called twice.
+    artistWinners = [];
   };
 
   this.clientLeft = function(client) {

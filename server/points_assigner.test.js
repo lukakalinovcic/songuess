@@ -135,10 +135,12 @@ test('maxPoints = 1, artistPoints', () => {
 
   expect(pa.gotAnswer({what: ARTIST, when: when++}, CLIENT_1)).toBe(true);
 
-  expect(chatRoom.grantScore).toBeCalledTimes(1);
-  expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 1, true);
   expect(chatRoom.guessingDone).toBeCalledTimes(1);
   expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+
+  pa.giveAnyRemainingArtistPoints();
+  expect(chatRoom.grantScore).toBeCalledTimes(1);
+  expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 1, true);
 });
 
 test('maxPoints = 2, artistPoints, only titles guessed', () => {
@@ -170,11 +172,12 @@ test('maxPoints = 2, one correct title one artist', () => {
   expect(chatRoom.guessingDone).not.toBeCalled();
 
   pa.gotAnswer({what: ARTIST, when: when++}, CLIENT_2);
-  expect(chatRoom.grantScore).toBeCalledTimes(2);
-  expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_2, 1, true);
-
   expect(chatRoom.guessingDone).toBeCalledTimes(1);
   expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+
+  pa.giveAnyRemainingArtistPoints();
+  expect(chatRoom.grantScore).toBeCalledTimes(2);
+  expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_2, 1, true);
 });
 
 test('maxPoints = 3, artist points only', () => {
@@ -188,13 +191,11 @@ test('maxPoints = 3, artist points only', () => {
   pa.gotAnswer({what: ARTIST, when: when++}, CLIENT_2);
   expect(chatRoom.grantScore).not.toBeCalled();
 
-  pa.finishTheRound();
-
+  pa.giveAnyRemainingArtistPoints();
   expect(chatRoom.grantScore).toBeCalledTimes(2);
   expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 3, true);
   expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_2, 2, true);
-  expect(chatRoom.guessingDone).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+  expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
 test('maxPoints = 3, artist points and a title point', () => {
@@ -209,15 +210,12 @@ test('maxPoints = 3, artist points and a title point', () => {
   pa.gotAnswer({what: TITLE, when: when++}, CLIENT_2);
   expect(chatRoom.grantScore).toBeCalledTimes(1);
   expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_2, 3);
-  expect(chatRoom.guessingDone).not.toBeCalled();
-
-  pa.finishTheRound();
 
   // CLIENT_2 already got 3 title points, CLIENT_1 gets 2 artist points.
+  pa.giveAnyRemainingArtistPoints();
   expect(chatRoom.grantScore).toBeCalledTimes(2);
   expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_1, 2, true);
-  expect(chatRoom.guessingDone).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+  expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
 test('maxPoints = 2, artist point ignored if you already have a title point', () => {
@@ -231,11 +229,9 @@ test('maxPoints = 2, artist point ignored if you already have a title point', ()
 
   pa.gotAnswer({what: ARTIST, when: when++}, CLIENT_1);
 
-  pa.finishTheRound();
-
+  pa.giveAnyRemainingArtistPoints();
   expect(chatRoom.grantScore).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+  expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
 test('maxPoints = 4, artist point becomes a title point', () => {
@@ -255,13 +251,11 @@ test('maxPoints = 4, artist point becomes a title point', () => {
   expect(chatRoom.grantScore).toBeCalledTimes(2);
   expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_1, 3);
 
-  pa.finishTheRound();
-
   // No more artist points awarded, the one we had already transitioned to a
   // title point.
+  pa.giveAnyRemainingArtistPoints();
   expect(chatRoom.grantScore).toBeCalledTimes(2);
-  expect(chatRoom.guessingDone).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+  expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
 test('maxPoints = 5, big case', () => {
@@ -288,14 +282,13 @@ test('maxPoints = 5, big case', () => {
   expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_4, 4);
 
   expect(chatRoom.guessingDone).not.toBeCalled();
-  pa.finishTheRound();
 
   // Remaining artist points awarded at this point.
+  pa.giveAnyRemainingArtistPoints();
   expect(chatRoom.grantScore).toBeCalledTimes(4);
   expect(chatRoom.grantScore).nthCalledWith(3, CLIENT_1, 3, true);
   expect(chatRoom.grantScore).nthCalledWith(4, CLIENT_3, 2, true);
-  expect(chatRoom.guessingDone).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+  expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
 test('playon is respected', () => {
@@ -436,12 +429,11 @@ test('more artist points than maxPoints', () => {
   pa.gotAnswer({what: ARTIST, when: when++}, CLIENT_4);
   expect(chatRoom.grantScore).not.toBeCalled();
  
-  pa.finishTheRound();
   // Only 2 people can get points (maxPoints=2).
+  pa.giveAnyRemainingArtistPoints();
   expect(chatRoom.grantScore).toBeCalledTimes(2);
   expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 2, true);
   expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_2, 1, true);
-  expect(chatRoom.guessingDone).toBeCalledTimes(1);
-  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+  expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
