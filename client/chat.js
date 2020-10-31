@@ -304,7 +304,7 @@ function Chat(wsock, user, media, player, onFatal) {
     var client = that.getClient(data.who);
     client.score += data.numPoints;
     copySharedToPidPeers(client);
-    ui.showArtistScore(data.who, data.numPoints);
+    ui.grantArtistScore(data.who, data.numPoints);
   });
 
   wsock.onMessage("guessing_done", function (data) {

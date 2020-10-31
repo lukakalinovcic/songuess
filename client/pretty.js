@@ -72,7 +72,11 @@ var pretty = {
     return pretty.text(text, "bold");
   },
   song : function (song) {
-    return '"' + pretty.text(song.title, "bold") + '"';
+    let msg = pretty.bold(song.title);
+    if (song.artist) {
+      msg += ' by ' + pretty.bold(song.artist);
+    }
+    return msg;
   },
   rowMessage : function (row) {
     if (row === 5) {

@@ -15,10 +15,6 @@ function MediaUI(media) {
       }
       const maxPoints = parseInt($("#max_points").val());
       const artistPoints = $("#artist_points").prop('checked');
-      if (artistPoints && maxPoints == 1) {
-        alert("Max points should be at least 2 when using artist points.");
-        return false;
-      }
       media.handleNewRoom({
         name : roomName,
         desc : $("#desc").val(),
@@ -52,8 +48,6 @@ function MediaUI(media) {
 
   this.hideDialog = function () {
     $(".layout.media").hide();
-    // this is not in our district, but we will
-    // do it :)
     $(".layout.chat").show();
     $(".layout.chat input").focus();
   }
