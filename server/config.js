@@ -52,26 +52,6 @@ exports.sync = {
   maxPing           : 1000
 };
 
-exports.media = {
-  // can log?
-  log : true,
-
-  // media timeout (502 will be generated)
-  timeout : 3,
-
-  // when media server stays silent for this amount of time
-  // kick him off. must be greater than helloInterval on media.
-  timeToPurge : 120,
-
-  // these media servers will not have to have valid token
-  trustServers : {
-    '127.0.0.1' : true
-  },
-
-  defaultMedia : 'default-media'
-
-};
-
 exports.auth = {
   clientID    :  '975171789069.apps.googleusercontent.com',
   verifyURL   :  'https://www.googleapis.com/oauth2/v1/tokeninfo',
@@ -99,48 +79,6 @@ exports.client = {
   // copied values from server config to client config
   authClientID : exports.auth.clientID,
   authScope : exports.auth.scope
-};
-
-exports.proxy = {
-  // can log
-  log : true,
-
-  // you can bypass proxy with this.
-  enable  : true,
-
-  // time period before proxy sends out the stream.
-  // it is used to warm-up cache.
-  // throttle delay will be calculated:
-  //   delay = Off + (rand() * 2 - 1) * Amp
-  throttleStreamOff : 2,
-  throttleStreamAmp : 2,
-
-  // where will proxy serve chunks
-  urlPrefix : '/c/',
-
-  // you can add extension to a chunk
-  urlSuffix : '',
-
-  // maximum number of seconds for media server to
-  // send a chunk. after this we will issue 504 gateway
-  // timeout to clients requesting that chunk.
-  maxDelay : 1,
-
-  // time that the URL returned from proxify will be available.
-  maxAge : 60,
-
-  // primary url sent to clients
-  // if this timeout's secondary url will be queried
-  primaryHttpRoot : 'http://localhost:8080',
-
-  // secondary url or null.
-  secondaryHttpRoot : null
-
-};
-
-exports.fixed_tags = {
-  // where to store information about fixtures.
-  storageFileName : '/dev/null'
 };
 
 // try and figure out how to use override.

@@ -3,7 +3,6 @@
 
 var
   clock = require("./clock.js"),
-  config = require("./config.js").chat,
   ChatRoom = require("./chat_room.js").ChatRoom,
   ChatClient = require("./chat_client.js").ChatClient;
 
