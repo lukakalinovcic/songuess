@@ -24,16 +24,34 @@ module.exports = function (currentItem, chatRoom) {
     return false;
   }
 
-  // Assumes the client with given ID exists!
+  // If the ID is not in there the arr will be left unchanged.
+  // Assumes all the IDs are unique.
   function removeClient(arr, client) {
-    let j = 0;
-    for (let i = 0; i < arr.length; ++i) {
+    let i = 0, j = 0;
+    for (i = 0; i < arr.length; ++i) {
       arr[j] = arr[i];
       if (arr[i].id() != client.id()) {
         ++j;
       }
     }
-    arr.pop();
+    // If element was found.
+    if (j == i - 1) {
+      arr.pop();
+    }
+  }
+
+  function checkIfRoundIsFinished() {
+    const maxClientsToGetPoints = Math.min(maxPoints, chatRoom.getNumberOfClients());
+    // If everyone got title points, we can close the round.
+    if (titleWinners.length == maxClientsToGetPoints ||
+        // If just one title point is left unawarded, and someone has an artist
+        // point, the situation also can't change anymore.
+        (artistWinners.length == 1 && titleWinners.length == maxClientsToGetPoints - 1)) {
+      // Note that if there are 2 artist winners, the one which would've gotten
+      // 1 point can still give a title answer and get 2 points instead of 1,
+      // so we can't finish the round.
+      that.finishTheRound();
+    }
   }
 
   this.gotAnswer = function (answerData, client) {
@@ -53,9 +71,7 @@ module.exports = function (currentItem, chatRoom) {
         // This is the case when a user first gets an artist right, but then also
         // gets the title. In this case we remove from artistWinners and append
         // to titleWinners.
-        if (clientPresent(artistWinners, client)) {
-          removeClient(artistWinners, client);
-        }
+        removeClient(artistWinners, client);
         titleWinners.push(client);
         // Title points can't change later and can be awarded immediately.
         chatRoom.grantScore(client, maxPoints - titleWinners.length + 1);
@@ -68,19 +84,7 @@ module.exports = function (currentItem, chatRoom) {
       }
     }
 
-    // TODO: The current number of clients is also important here, for example
-    // if maxPoints = 4 but there are already 2 clients and they all gave their
-    // title answers already.
-    // If everyone got title points, we can close the round.
-    if (titleWinners.length == maxPoints ||
-        // If just one title point is left unawarded, and someone has an artist
-        // point, the situation also can't change anymore.
-        (artistWinners.length == 1 && titleWinners.length == maxPoints - 1)) {
-      // Not that if there are 2 artist winners, the one which would've gotten
-      // 1 point can still give a title answer and by doing that get 2 points
-      // instead of 1, so we can't finish the round.
-      that.finishTheRound();
-    }
+    checkIfRoundIsFinished();
   };
 
   // This is called if the song has ended, or if next was called before all the
@@ -89,8 +93,16 @@ module.exports = function (currentItem, chatRoom) {
     // Title points have already been awarded.
     let points = maxPoints - titleWinners.length;
     for (const client of artistWinners) {
-      chatRoom.grantScore(client, points--);
+      if (points > 0) {
+        chatRoom.grantScore(client, points--);
+      }
     }
     chatRoom.guessingDone(playOn);
+  };
+
+  this.clientLeft = function(client) {
+    removeClient(titleWinners, client);
+    removeClient(artistWinners, client);
+    checkIfRoundIsFinished();
   };
 };

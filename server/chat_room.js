@@ -416,6 +416,10 @@ exports.ChatRoom = function (desc, chat) {
     return numberOfClients == 0;
   };
 
+  this.getNumberOfClients = function() {
+    return numberOfClients;
+  };
+
   // Called by the pointsAssigner.
   this.guessingDone = function (playOn) {
     const next_state = playOn? "playon": "after";
