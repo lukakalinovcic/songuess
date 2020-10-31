@@ -106,7 +106,6 @@ function Chat(wsock, user, media, player, onFatal) {
       if (clients.hasOwnProperty(id)) {
         if (that.id2Pid(id) === src_pid) {
           clients[id].score = src_client.score;
-          clients[id].row = src_client.row;
           clients[id].group = src_client.group;
         }
       }
@@ -376,7 +375,6 @@ function Chat(wsock, user, media, player, onFatal) {
   wsock.onMessage("token", ui.gotToken);
   wsock.onMessage("say", ui.addMessage);
   wsock.onMessage("who", ui.displayWho);
-  wsock.onMessage("row", ui.displayRow);
 
   wsock.onMessage("fixed_last", function (data) {
     // if lastSong is still the song that is being fixed, fix the lastSong as

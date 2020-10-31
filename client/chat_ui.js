@@ -141,17 +141,6 @@ function ChatUI(chat, user) {
     that.displayInfo(data.fixed_item);
   };
 
-  this.displayRow = function (desc) {
-    if (chat.getNumberOfPersons() <= 1) {
-      return;
-    }
-    if (desc.row % 5 === 0) {
-      entry("sys correct",
-        pretty.client(chat.getClient(desc.who)) + " is " +
-        pretty.rowMessage(desc.row));
-    }
-  };
-
   this.displayRoomDescription = function (desc) {
     entry("sys", desc? desc: "No room description.");
   };
@@ -173,7 +162,6 @@ function ChatUI(chat, user) {
   }
 
   this.guessingDone = function (data) {
-    // TODO: show artist!
     entry("sys correct",
       "Guessing done! The song was " + pretty.song(data.answer) + "." +
       (data.state == "playon" ? " #playon - can't stop." : ""));

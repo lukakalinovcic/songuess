@@ -78,23 +78,6 @@ var pretty = {
     }
     return msg;
   },
-  rowMessage : function (row) {
-    if (row === 5) {
-      return " in killing spree!";
-    }
-    if (row === 10) {
-      return " on a rampage!";
-    }
-    if (row === 15) {
-      return " dominating!!!";
-    }
-    if (row === 20) {
-      return " UNSTOPPABLE!";
-    }
-    if (row === 25) {
-      return " G O D L I K E ! ! 1";
-    }
-  },
   clientWithScore : function (client) {
     return $("<div>")
       .addClass("full-client")

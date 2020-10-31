@@ -27,7 +27,6 @@ exports.ChatRoom = function (desc, chat) {
       state : "dead",
       songStart : null,
       lastSong : null,
-      // TODO: remove this rampage thing, its complicated with multiple possible correct answers and artist points.
       lastScore : null,
       idkVotes : null,
       whoIdkVotes : null,
@@ -112,7 +111,6 @@ exports.ChatRoom = function (desc, chat) {
     if (!localPersonData.hasOwnProperty(client.pid())) {
       localPersonData[client.pid()] = {
         score : 0,
-        row : 0, // number of correct answers in a row
         num : 0, // number of your accounts connected
         group : 0 // what is your group?
       };
@@ -225,7 +223,6 @@ exports.ChatRoom = function (desc, chat) {
 
   function onResetScore(data, client) {
     client.local('score', 0);
-    client.local('row', 0);
     that.broadcast('called_reset', {
       who: client.id(),
       when: data.when
@@ -444,19 +441,7 @@ exports.ChatRoom = function (desc, chat) {
   // Called by the pointsAssigner.
   this.grantScore = function(client, numPoints, artistScore) {
     client.local('score', client.local('score') + numPoints);
-    // For counting streaks (consecutive correct answers).
-    if (roomState.lastScore === client.id()) {
-      client.local('row', client.local('row') + 1);
-    } else {
-      if (clients.hasOwnProperty(roomState.lastScore)) {
-        clients[roomState.lastScore].local('row', 0);
-      }
-      client.local('row', 1);
-    }
     roomState.lastScore = client.id();
-    if (client.local('row') > 2) {
-      that.broadcast('row', {who:client.id(), row:client.local('row')});
-    }
     if (artistScore) {
       that.broadcast('grant_artist_score', {
         who: client.id(),
