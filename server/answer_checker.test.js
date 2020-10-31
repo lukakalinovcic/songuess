@@ -80,6 +80,8 @@ test('accepted pairs', () => {
     true);
   expect(check('Everybody (Backstreet\'s Back) - Radio Edit',
     'backstreets back')).toBe(true);
+  expect(check('Everybody (Backstreet\'s Back) - Radio Edit',
+    'backstreets back allright')).toBe(true);
   expect(check('Stayin\' alive - From "Saturday Night Fever" Soundtrack',
     'stayin alive')).toBe(true);
   expect(check('Lady Marmelade - From "Moulin Rouge" Soundtrack',
@@ -87,6 +89,11 @@ test('accepted pairs', () => {
   expect(check('Stan (feat. Dido)', 'stan')).toBe(true);
   expect(check('Get Lucky (feat. Pharell Williams) - Radio Edit', 'get lucky'))
     .toBe(true);
+  expect(check('Princezo, javi se... - Live', 'princezo javi se')).toBe(true);
+  expect(check('Lunjo... - Live', 'lunjo')).toBe(true);
+  expect(check('Umoran sam', 'umoran sam prijatelju')).toBe(true);
+  expect(check('U ljubav vjerujem', 'ja u ljubav vjerujem')).toBe(true);
+  expect(check('Dalmatinac', 'dalmatinac sam')).toBe(true);
 });
 
 test('rejected pairs', () => {
@@ -105,8 +112,5 @@ test('rejected pairs', () => {
   // Not sure who would spell it out like this, I'm including it here for
   // completion because we have it in positive cases above.
   expect(check('Surfin U.S.A.', 'surfin u s a')).toBe(false);
-  // I decided that this example is fine not to accept.
-  // Feels to risky to accept supersets of the correct answer.
-  expect(check('Umoran sam', 'umoran sam prijatelju')).toBe(false);
   expect(check('Schön', 'Schon')).toBe(false);
 });

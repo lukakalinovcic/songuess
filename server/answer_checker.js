@@ -8,7 +8,7 @@ module.exports = function () {
     mulSpace = /  +/g,
     trimSpace = /^ | $/g,
     trimHashtag = /\#([^ ]+)/g,
-    trimDot = /\./g,
+    trimCharacters = /[\.']/g,
     replacePairs = [
       ['ć', 'c'],
       ['č', 'c'],
@@ -105,7 +105,7 @@ module.exports = function () {
     str = str.toString();
     str = str.toLowerCase();
     str = str.replace(trimHashtag, '');
-    str = str.replace(trimDot, '');
+    str = str.replace(trimCharacters, '');
     str = str.replace(nonAlphanum, ' ');
     str = str.replace(mulSpace, ' ');
     str = str.replace(trimSpace, '');
@@ -145,7 +145,7 @@ module.exports = function () {
     // This is supposed to catch cases like 'Imagine - Radio Edit'.
     const dash_pos = correct_title.indexOf(' - ');
     if (dash_pos > 0) {
-      answers.push(normalize(correct_title).substring(0, dash_pos));
+      answers.push(normalize(correct_title.substring(0, dash_pos)));
     }
 
     // Example where this is needed is the title 'dark horse feat juicy j'.
@@ -180,8 +180,9 @@ module.exports = function () {
     return answers;
   }
 
-  function compareNormalizedStrings(s1, s2) {
-    if (s1 === s2) return true;
+  function compareNormalizedStrings(correct, attempt) {
+    // We accept supersets of the correct answer as well.
+    if (attempt.indexOf(correct) >= 0) return true;
 
     // If the title has a lot of optional stuff in parenthesis, the typed
     // accepted answer might be short.
@@ -189,11 +190,11 @@ module.exports = function () {
     // in the shorter one.
     // So we use the 'min' instead of 'max' here instead.
     const allowed_mistakes = Math.floor(
-      Math.min(s1.length, s2.length) * MISTAKES_BY_CHAR
+      Math.min(correct.length, attempt.length) * MISTAKES_BY_CHAR
     );
 
-    if (editDistanceUnderEstimate2(s1, s2) > allowed_mistakes) return false;
-    if (editDistance(s1, s2) > allowed_mistakes) return false;
+    if (editDistanceUnderEstimate2(correct, attempt) > allowed_mistakes) return false;
+    if (editDistance(correct, attempt) > allowed_mistakes) return false;
     return true;
   }
 
@@ -207,7 +208,7 @@ module.exports = function () {
   this.checkAnswer = function (correct_title, answer) {
     const normalized_answer = normalize(answer);
     for (const correct_answer of generateCorrectAnswers(correct_title)) {
-      if (compareNormalizedStrings(normalized_answer, correct_answer)) {
+      if (compareNormalizedStrings(correct_answer, normalized_answer)) {
         return true;
       }
     }
