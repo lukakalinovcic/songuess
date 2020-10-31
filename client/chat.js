@@ -288,24 +288,28 @@ function Chat(wsock, user, media, player, onFatal) {
   });
 
   wsock.onMessage("correct_title", function (data) {
-    console.log('correct_title', data);
-    var client = that.getClient(data.who);
-    client.score += data.numPoints;
-    copySharedToPidPeers(client);
-
-    ui.correctTitle(data.who);
+    if (data.numPoints) {
+      var client = that.getClient(data.who);
+      client.score += data.numPoints;
+      copySharedToPidPeers(client);
+    }
+    ui.correctTitle(data.who, data.numPoints);
   });
 
   wsock.onMessage("correct_artist", function (data) {
     ui.correctArtist(data.who);
   });
 
+  wsock.onMessage("grant_artist_score", function (data) {
+    var client = that.getClient(data.who);
+    client.score += data.numPoints;
+    copySharedToPidPeers(client);
+    ui.showArtistScore(data.who, data.numPoints);
+  });
+
   wsock.onMessage("guessing_done", function (data) {
-    // TODO
-    // data should contain info about artist points that were given out
     roomState.lastSong = data.answer;
     roomState.state = data.state;
-
     ui.guessingDone(data);
   });
 

@@ -15,7 +15,7 @@ exports.ChatRoom = function (desc, chat) {
     clients = {},
     localPersonData = {},
     numberOfClients = 0,
-    pointsAssigner = new PointsAssigner(this),
+    pointsAssigner = null,
     currentItem = null,
     hostSocket = null,
 
@@ -65,7 +65,7 @@ exports.ChatRoom = function (desc, chat) {
       var startTime = clock.clock() + 8000;
 
       currentItem = nextSongItem;
-      pointsAssigner.init(currentItem);
+      pointsAssigner = new PointsAssigner(currentItem, that);
 
       setTimeout(function() {
         roomState.state = "suspense";
@@ -127,14 +127,10 @@ exports.ChatRoom = function (desc, chat) {
       throw "to specified, but not in this room";
     }
 
-    // TODO dont show the correct answer right away!
-    that.broadcast('say', data);
-
-    // only if state is playing check for correct answer.
-    if (roomState.state !== "playing") {
-      return;
+    if (roomState.state !== "playing" ||
+      (pointsAssigner && !pointsAssigner.gotAnswer(data, client))) {
+      that.broadcast('say', data);
     }
-    pointsAssigner.gotAnswer(data, client);
   }
 
   function onNewRoom(data, client) {
@@ -288,7 +284,10 @@ exports.ChatRoom = function (desc, chat) {
       return;
     }
     client.local('group', data.group);
-    that.broadcast('change_group', {who:client.id(), group:data.group});
+    that.broadcast('change_group', {
+      who: client.id(),
+      group: data.group
+    });
   }
 
   this.desc = desc;
@@ -362,8 +361,7 @@ exports.ChatRoom = function (desc, chat) {
     }
   };
 
-  // pop a client from a list of clients and
-  // notify all other clients about the popping :)
+  // Pop a client from a list of clients and notify other clients.
   this.leave = function (client, reason) {
     numberOfClients--;
 
@@ -386,6 +384,9 @@ exports.ChatRoom = function (desc, chat) {
         hostSocket.closeSocket();
         this.detachHostSocket();
       }
+    }
+    if (pointsAssigner) {
+      pointsAssigner.clientLeft(client);
     }
     this.broadcast('old_client', [client.id(), reason]);
   };
@@ -436,7 +437,7 @@ exports.ChatRoom = function (desc, chat) {
   }
 
   // Called by the pointsAssigner.
-  this.grantScore = function(client, numPoints) {
+  this.grantScore = function(client, numPoints, artistScore) {
     client.local('score', client.local('score') + numPoints);
     // For counting streaks (consecutive correct answers).
     if (roomState.lastScore === client.id()) {
@@ -450,6 +451,12 @@ exports.ChatRoom = function (desc, chat) {
     roomState.lastScore = client.id();
     if (client.local('row') > 2) {
       that.broadcast('row', {who:client.id(), row:client.local('row')});
+    }
+    if (artistScore) {
+      that.broadcast('grant_artist_score', {
+        who: client.id(),
+        numPoints: numPoints
+      });
     }
   };
 };

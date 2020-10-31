@@ -62,11 +62,14 @@ var pretty = {
       .html(pretty.timeInterval(offset))[0]
       .outerHTML;
   },
-  text : function (info, css_class) {
+  text : function (text, css_class) {
     return $("<span>")
       .addClass(css_class)
-      .text(info)[0]
+      .text(text)[0]
       .outerHTML;
+  },
+  bold : function (text) {
+    return pretty.text(text, "bold");
   },
   song : function (song) {
     return '"' + pretty.text(song.title, "bold") + '"';

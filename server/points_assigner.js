@@ -54,16 +54,15 @@ module.exports = function (currentItem, chatRoom) {
     }
   }
 
+  // Returns whether this answer should be shown to everyone or not.
   this.gotAnswer = function (answerData, client) {
     const gotTitle = answerChecker.checkAnswer(currentItem.title, answerData.what);
     const gotArtist = artistPoints && answerChecker.checkAnswer(currentItem.artist, answerData.what);
 
+    let broadcastData = {who: client.id(), when: answerData.when};
+
     if (gotTitle || gotArtist) {
       playOn = playOn || (answerData.what.indexOf('#playon') != -1);
-      chatRoom.broadcast(gotTitle? 'correct_title': 'correct_artist', {
-        who: client.id(),
-        when : answerData.when
-      });
     }
 
     if (gotTitle) {
@@ -74,17 +73,22 @@ module.exports = function (currentItem, chatRoom) {
         removeClient(artistWinners, client);
         titleWinners.push(client);
         // Title points can't change later and can be awarded immediately.
-        chatRoom.grantScore(client, maxPoints - titleWinners.length + 1);
+        broadcastData.numPoints = maxPoints - titleWinners.length + 1;
+        chatRoom.grantScore(client, broadcastData.numPoints);
       }
+      chatRoom.broadcast('correct_title', broadcastData);
     } else if (gotArtist) {
       if (!clientPresent(titleWinners, client) && !clientPresent(artistWinners, client)) {
         // Artist points could later become title points so they are not
         // awarded right away.
         artistWinners.push(client);
       }
+      chatRoom.broadcast('correct_artist', broadcastData);
     }
 
     checkIfRoundIsFinished();
+
+    return gotTitle || gotArtist;
   };
 
   // This is called if the song has ended, or if next was called before all the
@@ -94,7 +98,7 @@ module.exports = function (currentItem, chatRoom) {
     let points = maxPoints - titleWinners.length;
     for (const client of artistWinners) {
       if (points > 0) {
-        chatRoom.grantScore(client, points--);
+        chatRoom.grantScore(client, points--, /*artistScore=*/true);
       }
     }
     chatRoom.guessingDone(playOn);

@@ -93,7 +93,7 @@ function ChatUI(chat, user) {
   };
 
   this.showHint = function (hint) {
-    entry("sys", "Hint: '" + pretty.text(hint, "bold") + "'");
+    entry("sys", "Hint: '" + pretty.bold(hint) + "'");
   };
 
   this.honored = function (desc) {
@@ -107,15 +107,15 @@ function ChatUI(chat, user) {
 
   this.displayInfo = function (song) {
     entry("sys", " hmmm, You ask last song what was?");
-    entry("sys", " artist: " + pretty.text(song.artist, "bold"));
-    entry("sys", " album : " + pretty.text(song.album, "bold"));
-    entry("sys", " title : " + pretty.text(song.title, "bold"));
+    entry("sys", " artist: " + pretty.bold(song.artist));
+    entry("sys", " album : " + pretty.bold(song.album));
+    entry("sys", " title : " + pretty.bold(song.title));
     // Display all alternate titles.
     var alt_index = 2, key;
     for (;;) {
       key = "title" + (alt_index++);
       if (song.hasOwnProperty(key)) {
-        entry("sys", " " + key + ": " + pretty.text(song[key], "bold"));
+        entry("sys", " " + key + ": " + pretty.bold(song[key]));
       } else {
         break;
       }
@@ -156,20 +156,34 @@ function ChatUI(chat, user) {
     entry("sys", desc? desc: "No room description.");
   };
 
-  this.correctArtist = function(who) {
+  this.correctArtist = function (who) {
     entry("sys", pretty.client(chat.getClient(who)) + " got the artist!");
     // TODO add rick roll
     // " Well done <a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" target=\"_blank\">" +
   }
 
-  this.correctTitle = function(who) {
-    entry("sys", pretty.client(chat.getClient(who)) + " got the title!");
+  this.correctTitle = function (who, numPoints) {
+    let msg = pretty.client(chat.getClient(who)) + " got the title";
+    if (numPoints) {
+      let optionalS = numPoints == 1? "" : "s";
+      msg += ` (${numPoints} point${optionalS})`;
+    }
+    entry("sys", msg + "!");
+    this.updateList();
   }
 
-  this.guessingDone = function(data) {
+  this.guessingDone = function (data) {
+    // TODO: show artist!
     entry("sys correct",
       "Guessing done! The song was " + pretty.song(data.answer) + "." +
       (data.state == "playon" ? " #playon - can't stop." : ""));
+    this.updateList();
+  };
+
+  this.grantArtistScore = function (who, numPoints) {
+    let optionalS = numPoints == 1? "" : "s";
+    entry("sys",
+      `${pretty.client(chat.getClient(who))} gets ${numPoints} artist point${optionalS}.`);
     this.updateList();
   };
 
