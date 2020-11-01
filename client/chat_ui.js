@@ -157,7 +157,7 @@ function ChatUI(chat, user) {
     let msg = pretty.client(chat.getClient(who)) + " got the title";
     if (numPoints) {
       let optionalS = numPoints == 1? "" : "s";
-      msg += ` (${numPoints} point${optionalS})`;
+      msg += " (" + numPoints + " point" + optionalS + ")";
     }
     entry("sys", msg + "!");
     this.updateList();
@@ -173,7 +173,8 @@ function ChatUI(chat, user) {
   this.grantArtistScore = function (who, numPoints) {
     let optionalS = numPoints == 1? "" : "s";
     entry("sys",
-      `${pretty.client(chat.getClient(who))} gets ${numPoints} artist point${optionalS}.`);
+      pretty.client(chat.getClient(who)) + " gets " + numPoints +
+      " artist point" + optionalS + ".");
     this.updateList();
   };
 
