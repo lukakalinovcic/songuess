@@ -29,8 +29,8 @@ exports.ChatRoom = function (desc, chat) {
       lastSong : null,
       lastScore : null,
       idkVotes : null,
-      whoIdkVotes : null,
-      hintShowed : null
+      whoIdkVotes : {},
+      hintShowed : false
     };
 
   function packRoomState() {
@@ -164,16 +164,18 @@ exports.ChatRoom = function (desc, chat) {
   }
 
   // Returns whether the majority was reached.
-  function checkForIdkVoteMajority(data, client) {
+  // implicitIdk happens for example if you leave, or if you guess the title.
+  function checkForIdkVoteMajority(data, client, implicitIdk) {
     if (roomState.idkVotes >= 1 + Math.floor(numberOfClients / 2)) {
       // If state is playon, it means all the points have been assigned.
       // It doesn't make sense to show the hint in this case.
       if (roomState.hintShowed === false && roomState.state !== "playon") {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
-          hint: calcHint(currentItem),
           when : data.when,
-          state : roomState.state
+          state : roomState.state,
+          implicitIdk: implicitIdk,
+          hint: calcHint(currentItem)
         });
         roomState.hintShowed = true;
         // Reset the voting. We want another majority in order to skip the song
@@ -183,9 +185,10 @@ exports.ChatRoom = function (desc, chat) {
       } else {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
-          answer: currentItem,
           when : data.when,
-          state : roomState.state
+          state : roomState.state,
+          implicitIdk: implicitIdk,
+          answer: currentItem
         });
         roomState.lastScore = null;
         playNext();
@@ -372,13 +375,12 @@ exports.ChatRoom = function (desc, chat) {
     numberOfClients--;
 
     // Pull this person's /idk vote back.
-    if (roomState.whoIdkVotes &&
-        roomState.whoIdkVotes.hasOwnProperty(client.id())) {
+    if (roomState.whoIdkVotes.hasOwnProperty(client.id())) {
       delete roomState.whoIdkVotes[client.id()];
       --roomState.idkVotes;
     }
     // Re-evaluate if we now have the majority for triggering an /idk event.
-    checkForIdkVoteMajority({when: clock.clock()}, client);
+    checkForIdkVoteMajority({when: clock.clock()}, client, /*implicitIdk=*/true);
 
     client.local('num', client.local('num') - 1);
     delete clients[client.id()];
@@ -443,7 +445,7 @@ exports.ChatRoom = function (desc, chat) {
   }
 
   // Called by the pointsAssigner.
-  this.grantScore = function(client, numPoints, artistScore) {
+  this.grantScore = function(client, numPoints, artistScore, isRoundFinished) {
     client.local('score', client.local('score') + numPoints);
     roomState.lastScore = client.id();
     if (artistScore) {
@@ -451,6 +453,16 @@ exports.ChatRoom = function (desc, chat) {
         who: client.id(),
         numPoints: numPoints
       });
+    // Guessing the title means the user should be counted against showing the
+    // hint or skipping the song (as if they called /idk).
+    } else if (!isRoundFinished &&
+               !roomState.whoIdkVotes.hasOwnProperty(client.id())) {
+      roomState.whoIdkVotes[client.id()] = 1;
+      ++roomState.idkVotes;
+      checkForIdkVoteMajority(
+        {when: clock.clock()},
+        client,
+        /*implicitIdk=*/true);
     }
-  };
+  }
 };

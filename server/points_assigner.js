@@ -40,7 +40,7 @@ module.exports = function (currentItem, chatRoom) {
     }
   }
 
-  function checkIfRoundIsFinished() {
+  function isRoundFinished() {
     const maxClientsToGetPoints = Math.min(maxPoints, chatRoom.getNumberOfClients());
     // If everyone got title points, we can close the round.
     if (titleWinners.length == maxClientsToGetPoints ||
@@ -50,8 +50,9 @@ module.exports = function (currentItem, chatRoom) {
       // Note that if there are 2 artist winners, the one which would've gotten
       // 1 point can still give a title answer and get 2 points instead of 1,
       // so we can't finish the round.
-      chatRoom.guessingDone(playOn);
+      return true;
     }
+    return false;
   }
 
   // Returns whether this answer should be shown to everyone or not.
@@ -74,11 +75,16 @@ module.exports = function (currentItem, chatRoom) {
         titleWinners.push(client);
         // Title points can't change later and can be awarded immediately.
         broadcastData.numPoints = maxPoints - titleWinners.length + 1;
-        chatRoom.grantScore(client, broadcastData.numPoints);
+        chatRoom.grantScore(
+          client,
+          broadcastData.numPoints,
+          /*artistScore=*/ false,
+          isRoundFinished());
       }
       chatRoom.broadcast('correct_title', broadcastData);
     } else if (gotArtist) {
-      if (!clientPresent(titleWinners, client) && !clientPresent(artistWinners, client)) {
+      if (!clientPresent(titleWinners, client) &&
+          !clientPresent(artistWinners, client)) {
         // Artist points could later become title points so they are not
         // awarded right away.
         artistWinners.push(client);
@@ -86,7 +92,9 @@ module.exports = function (currentItem, chatRoom) {
       chatRoom.broadcast('correct_artist', broadcastData);
     }
 
-    checkIfRoundIsFinished();
+    if (isRoundFinished()) {
+      chatRoom.guessingDone(playOn);
+    }
 
     return gotTitle || gotArtist;
   };
@@ -98,7 +106,7 @@ module.exports = function (currentItem, chatRoom) {
     let points = maxPoints - titleWinners.length;
     for (const client of artistWinners) {
       if (points > 0) {
-        chatRoom.grantScore(client, points--, /*artistScore=*/true);
+        chatRoom.grantScore(client, points--, /*artistScore=*/ true);
       }
     }
     // Just in case this is called twice.
@@ -108,6 +116,12 @@ module.exports = function (currentItem, chatRoom) {
   this.clientLeft = function(client) {
     removeClient(titleWinners, client);
     removeClient(artistWinners, client);
-    checkIfRoundIsFinished();
+    if (isRoundFinished()) {
+      chatRoom.guessingDone(playOn);
+    }
+  };
+
+  this.getTitleWinnersSize = function() {
+    return titleWinners.length;
   };
 };
