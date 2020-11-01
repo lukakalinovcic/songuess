@@ -95,7 +95,7 @@ function ChatUI(chat, user) {
   };
 
   this.showHint = function (hint) {
-    entry("sys", "Hint: '" + pretty.bold(hint) + "'");
+    entry("sys", "Hint: " + pretty.song(hint));
   };
 
   this.honored = function (desc) {

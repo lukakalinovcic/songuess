@@ -155,9 +155,9 @@ exports.ChatRoom = function (desc, chat) {
     return hint;
   }
 
-  function calcHint(currentItem) {
-    // TODO: include artist hint?
-    let words = currentItem.title.split(' ');
+  function calcHint(text) {
+    if (!text) return '';
+    let words = text.split(' ');
     return words.map(w => calcWordHint(w)).join(' ');
   }
 
@@ -170,10 +170,14 @@ exports.ChatRoom = function (desc, chat) {
       if (roomState.hintShowed === false && roomState.state !== "playon") {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
-          when : data.when,
-          state : roomState.state,
+          when: data.when,
+          state: roomState.state,
           implicitIdk: implicitIdk,
-          hint: calcHint(currentItem)
+          hint: {
+            title: calcHint(currentItem.title),
+            artist: desc.artistPoints ?
+              calcHint(currentItem.artist) : currentItem.artist
+          }
         });
         roomState.hintShowed = true;
         // Remove the non-implicit votes.
