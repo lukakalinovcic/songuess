@@ -59,7 +59,7 @@ exports.ChatRoom = function (desc, chat) {
     }
 
     if (pointsAssigner) {
-      pointsAssigner.giveAnyRemainingArtistPoints();
+      pointsAssigner.giveArtistPoints();
     }
 
     roomState.state = "after";

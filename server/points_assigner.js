@@ -44,9 +44,12 @@ module.exports = function (currentItem, chatRoom) {
     const maxClientsToGetPoints = Math.min(maxPoints, chatRoom.getNumberOfClients());
     // If everyone got title points, we can close the round.
     if (titleWinners.length == maxClientsToGetPoints ||
-        // If just one title point is left unawarded, and someone has an artist
-        // point, the situation also can't change anymore.
-        (artistWinners.length == 1 && titleWinners.length == maxClientsToGetPoints - 1)) {
+        // If everyone in the room got a title point besides one person, and
+        // that person already has an artist point, we can also end the round.
+        // That remaining person can't get more than 1 point, and no one else
+        // can take that point away from them by guessing the title.
+        (titleWinners.length == chatRoom.getNumberOfClients() - 1 &&
+         artistWinners.length == 1)) {
       // Note that if there are 2 artist winners, the one which would've gotten
       // 1 point can still give a title answer and get 2 points instead of 1,
       // so we can't finish the round.
@@ -101,7 +104,7 @@ module.exports = function (currentItem, chatRoom) {
 
   // This should be called externally for example if the song has ended, or if
   // next was called before/ all the points were given out.
-  this.giveAnyRemainingArtistPoints = function () {
+  this.giveArtistPoints = function () {
     // Title points have already been awarded.
     let points = maxPoints - titleWinners.length;
     for (const client of artistWinners) {
