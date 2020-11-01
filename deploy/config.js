@@ -12,6 +12,4 @@ module.exports = function(exports) {
   exports.socket.pingInterval = 15;
 
   exports.sync.maxClockDeviation = 50;
-
-  exports.fixed_tags.storageFileName = '/srv/songuess/fixed_tags.json';
 };
