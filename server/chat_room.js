@@ -27,7 +27,7 @@ exports.ChatRoom = function (desc, chat) {
       state : "dead",
       songStart : null,
       lastSong : null,
-      lastScore : null,
+      lastScore : new Map(),
       whoIdkVotes : new Map(),
       hintShowed : false
     };
@@ -65,7 +65,7 @@ exports.ChatRoom = function (desc, chat) {
     roomState.songStart = null;
     
     hostSocket.playNext(function(err, nextSongItem) {
-      var startTime = clock.clock() + 8000;
+      let startTime = clock.clock() + 8000;
 
       currentItem = nextSongItem;
       pointsAssigner = new PointsAssigner(currentItem, that);
@@ -78,8 +78,9 @@ exports.ChatRoom = function (desc, chat) {
 
       setTimeout(function() {
         roomState.state = "playing";
-        roomState.whoIdkVotes = new Map();
         roomState.hintShowed = false;
+        roomState.whoIdkVotes = new Map();
+        roomState.lastScore = new Map();
       }, Math.max(0, startTime - clock.clock()));
     });
   }
@@ -200,7 +201,6 @@ exports.ChatRoom = function (desc, chat) {
           implicitIdk: implicitIdk,
           answer: currentItem
         });
-        roomState.lastScore = null;
         playNext();
       }
       return true;
@@ -244,26 +244,26 @@ exports.ChatRoom = function (desc, chat) {
     });
   }
 
-  // TODO: What happens with /honor when multiple points are present?
   function onHonor(data, client) {
-    var target;
     if (!clients.hasOwnProperty(data.to)) {
       return info("Target acc is not in da klub.", client);
     }
-    target = clients[data.to];
-    if (roomState.state !== "after" && roomState.state !== "playon") {
-      return info("Can't honor in this moment.", client);
+    let target = clients[data.to];
+    if (roomState.state !== "after") {
+      return info("Honoring only allowed after guessing is done.", client);
     }
     if (target === client) {
-      return info("You are honored.. gee, well done!", client);
+      return info("Can't honor yourself.", client);
     }
-    if (client.id() !== roomState.lastScore) {
-      return info("You didn't make the last score.", client);
+    if (!roomState.lastScore.has(client.id())) {
+      return info("You don't have any points to give in this round.", client);
     }
-    client.local('score', client.local('score') - 1);
-    target.local('score', target.local('score') + 1);
-    roomState.lastScore = target.id();
+    let numPoints = roomState.lastScore.get(client.id());
+    client.local('score', client.local('score') - numPoints);
+    target.local('score', target.local('score') + numPoints);
     that.broadcast('honored', {from: client.id(), to: target.id()});
+    // Prevent from honoring twice.
+    roomState.lastScore.delete(client.id());
   }
 
   function songEndedHandler() {
@@ -272,7 +272,6 @@ exports.ChatRoom = function (desc, chat) {
       when : clock.clock(),
       state : roomState.state
     });
-    roomState.lastScore = null;
     playNext();
   }
 
@@ -311,8 +310,7 @@ exports.ChatRoom = function (desc, chat) {
   this.desc = desc;
 
   this.broadcast = function (type, msg, except) {
-    var id;
-    for (id in clients) {
+    for (let id in clients) {
       if (clients.hasOwnProperty(id)) {
         if (!(except && except.id() === id)) {
           clients[id].send(type, msg);
@@ -322,8 +320,7 @@ exports.ChatRoom = function (desc, chat) {
   };
 
   this.broadcastRaw = function (data) {
-    var id;
-    for (id in clients) {
+    for (let id in clients) {
       clients[id].sendRaw(data);
     }
   };
@@ -332,9 +329,9 @@ exports.ChatRoom = function (desc, chat) {
   // function will copy local data to all other clients
   // with same pid and to room's localPersonData
   this.localDataChanged = function (client) {
-    var pid = client.pid(), id;
+    let pid = client.pid();
     localPersonData[pid] = client.desc('local');
-    for (id in clients) {
+    for (let id in clients) {
       if (clients.hasOwnProperty(id)) {
         if (clients[id].pid() === pid) {
           clients[id].desc('local', localPersonData[pid]);
@@ -406,10 +403,10 @@ exports.ChatRoom = function (desc, chat) {
   };
 
   this.packWhoData = function () {
-    var id, client, sol = {};
-    for (id in clients) {
+    let sol = {};
+    for (let id in clients) {
       if (clients.hasOwnProperty(id)) {
-        client = clients[id];
+        let client = clients[id];
         sol[ client.desc('display') ] = client.local('score');
       }
     }
@@ -453,7 +450,7 @@ exports.ChatRoom = function (desc, chat) {
   // Called by the pointsAssigner.
   this.grantScore = function(client, numPoints, artistScore, isRoundFinished) {
     client.local('score', client.local('score') + numPoints);
-    roomState.lastScore = client.id();
+    roomState.lastScore.set(client.id(), numPoints);
     if (artistScore) {
       that.broadcast('grant_artist_score', {
         who: client.id(),
