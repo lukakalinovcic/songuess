@@ -158,6 +158,7 @@ exports.ChatRoom = function (desc, chat) {
   }
 
   function calcHint(currentItem) {
+    // TODO: include artist hint?
     let words = currentItem.title.split(' ');
     return words.map(w => calcWordHint(w)).join(' ');
   }
@@ -165,7 +166,9 @@ exports.ChatRoom = function (desc, chat) {
   // Returns whether the majority was reached.
   function checkForIdkVoteMajority(data, client) {
     if (roomState.idkVotes >= 1 + Math.floor(numberOfClients / 2)) {
-      if (roomState.hintShowed === false) {
+      // If state is playon, it means all the points have been assigned.
+      // It doesn't make sense to show the hint in this case.
+      if (roomState.hintShowed === false && roomState.state !== "playon") {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
           hint: calcHint(currentItem),
@@ -229,6 +232,7 @@ exports.ChatRoom = function (desc, chat) {
     });
   }
 
+  // TODO: What happens with /honor when multiple points are present?
   function onHonor(data, client) {
     var target;
     if (!clients.hasOwnProperty(data.to)) {

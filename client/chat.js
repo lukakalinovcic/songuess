@@ -361,6 +361,7 @@ function Chat(wsock, user, media, player, onFatal) {
   });
 
   wsock.onMessage("called_i_dont_know", function (data) {
+    ui.calledIDontKnow(data);
     if (data.hasOwnProperty('hint')) {
       ui.showHint(data.hint);
     } else if (data.hasOwnProperty('answer')) {
@@ -368,7 +369,6 @@ function Chat(wsock, user, media, player, onFatal) {
       setTimeout(pretty.relativeTime, 3000);
       setTimeout(player.pause, 3000);
     }
-    ui.calledIDontKnow(data);
   });
 
   wsock.onMessage("song_ended", ui.songEnded);
