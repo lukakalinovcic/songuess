@@ -156,23 +156,6 @@ function Chat(wsock, user, media, player, onFatal) {
     }
   });
 
-  onCommand("ch", function (/* fix_what, new_name, .. */) {
-    var args = Array.prototype.slice.call(arguments);
-    var fix_what = args.shift();
-    var new_name = args.join(" ").trim();
-    if (!validChTarget(fix_what)) {
-      return ui.addNotice(
-        "/ch {artist,album,title,title2,...} new value for a field", "err");
-    }
-    var fixed_item = JSON.parse(JSON.stringify(roomState.lastSong));
-    if (fixed_item[fix_what] == new_name) {
-      return ui.addNotice("You didn't change the " + fix_what, "err");
-    }
-    fixed_item[fix_what] = new_name;
-    wsock.sendType("fix_last",
-      {when: myClock.clock(), fixed_item: fixed_item});
-  });
-
   onCommand("desc", function () {
     ui.displayRoomDescription(roomDescription);
   });
@@ -375,16 +358,6 @@ function Chat(wsock, user, media, player, onFatal) {
   wsock.onMessage("token", ui.gotToken);
   wsock.onMessage("say", ui.addMessage);
   wsock.onMessage("who", ui.displayWho);
-
-  wsock.onMessage("fixed_last", function (data) {
-    // if lastSong is still the song that is being fixed, fix the lastSong as
-    // well.
-    if (data.fixed_item.media == roomState.lastSong.media &&
-        data.fixed_item.id == roomState.lastSong.id) {
-      roomState.lastSong = data.fixed_item;
-    }
-    ui.displayFixedLast(data);
-  });
 
   wsock.onMessage("new_client", function (user) {
     clients[user.id] = user;

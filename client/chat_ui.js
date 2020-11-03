@@ -135,14 +135,6 @@ function ChatUI(chat, user) {
     }
   };
 
-  this.displayFixedLast = function (data) {
-    entry("sys correct",
-      pretty.client(chat.getClient(data.who)) +
-        " changed the tags for the previous song:");
-    var song = data.fixed_item;
-    that.displayInfo(data.fixed_item);
-  };
-
   this.displayRoomDescription = function (desc) {
     entry("sys", desc? desc: "No room description.");
   };
