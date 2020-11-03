@@ -146,7 +146,7 @@ exports.ChatRoom = function (desc, chat) {
   function calcWordHint(word) {
     word = word.toLowerCase();
     // Start the hint by removing all the alphabetic characters.
-    let hint = word.replace(/[a-z]/g, '.');
+    let hint = word.replace(/[a-zčćšđž]/g, '.');
     for (let i = 0; i < word.length; ++i) {
       // If this was a vowel, bring it back from the original string.
       if (/[aeiouäëöüy]/.test(word[i])) {
