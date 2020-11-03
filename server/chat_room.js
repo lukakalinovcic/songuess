@@ -161,31 +161,30 @@ exports.ChatRoom = function (desc, chat) {
   }
 
   // Returns whether the majority was reached.
-  function checkForIdkVoteMajority(data, client) {
+  // implicitIdk happens for example if you leave, or if you guess the title.
+  function checkForIdkVoteMajority(data, client, implicitIdk) {
     let stillGuessing = numberOfClients - pointsAssigner.getTitleWinnersSize();
     if (roomState.whoIdkVotes.size >= 1 + Math.floor(stillGuessing / 2)) {
+      let idk_data = {
+        who: client.id(),
+        when: data.when,
+        state: roomState.state,
+        implicitIdk: implicitIdk
+      };
       // If state is playon, it means all the points have been assigned.
       // It doesn't make sense to show the hint in this case.
       if (roomState.hintShowed === false && roomState.state !== "playon") {
-        that.broadcast('called_i_dont_know', {
-          who: client.id(),
-          when: data.when,
-          state: roomState.state,
-          hint: {
-            title: calcHint(currentItem.title),
-            artist: desc.artistPoints ?
-              calcHint(currentItem.artist) : currentItem.artist
-          }
-        });
+        idk_data.hint = {
+          title: calcHint(currentItem.title),
+          artist: desc.artistPoints ?
+            calcHint(currentItem.artist) : currentItem.artist
+        };
+        that.broadcast('called_i_dont_know', idk_data);
         roomState.hintShowed = true;
         roomState.whoIdkVotes = new Set();
       } else {
-        that.broadcast('called_i_dont_know', {
-          who: client.id(),
-          when : data.when,
-          state : roomState.state,
-          answer: currentItem
-        });
+        idk_data.answer = currentItem;
+        that.broadcast('called_i_dont_know', idk_data);
         playNext();
       }
       return true;
@@ -370,7 +369,7 @@ exports.ChatRoom = function (desc, chat) {
     pointsAssigner.clientLeft(client);
 
     // Re-evaluate if we now have the majority for triggering an /idk event.
-    checkForIdkVoteMajority({when: clock.clock()}, client);
+    checkForIdkVoteMajority({when: clock.clock()}, client, /*implicitIdk=*/true);
 
     client.local('num', client.local('num') - 1);
     delete clients[client.id()];
@@ -443,7 +442,7 @@ exports.ChatRoom = function (desc, chat) {
     // Guessing the title might trigger /idk, because the pool of people that
     // are still guessing was decreased.
     } else if (!isRoundFinished) {
-      checkForIdkVoteMajority({when: clock.clock()}, client);
+      checkForIdkVoteMajority({when: clock.clock()}, client, /*implicitIdk=*/true);
     }
   }
 };
