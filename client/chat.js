@@ -275,11 +275,11 @@ function Chat(wsock, user, media, player, onFatal) {
       client.score += data.numPoints;
       copySharedToPidPeers(client);
     }
-    ui.correctTitle(data.who, data.numPoints);
+    ui.correctTitle(data.who, data.numPoints, data.when, data.roll);
   });
 
   wsock.onMessage("correct_artist", function (data) {
-    ui.correctArtist(data.who);
+    ui.correctArtist(data.who, data.when);
   });
 
   wsock.onMessage("grant_artist_score", function (data) {

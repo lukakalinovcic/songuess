@@ -84,6 +84,9 @@ module.exports = function (currentItem, chatRoom) {
           /*artistScore=*/ false,
           isRoundFinished());
       }
+      if (currentItem.title.toLowerCase() === 'never gonna give you up') {
+        broadcastData.roll = true;
+      }
       chatRoom.broadcast('correct_title', broadcastData);
     } else if (gotArtist) {
       if (!clientPresent(titleWinners, client) &&

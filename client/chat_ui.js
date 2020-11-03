@@ -131,19 +131,21 @@ function ChatUI(chat, user) {
     entry("sys", desc? desc: "No room description.");
   };
 
-  this.correctArtist = function (who) {
-    entry("sys", pretty.client(chat.getClient(who)) + " got the artist!");
-    // TODO add rick roll
-    // " Well done <a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" target=\"_blank\">" +
+  this.correctArtist = function (who, when) {
+    entry("sys relative", pretty.client(chat.getClient(who)) + " got the artist!", when);
   }
 
-  this.correctTitle = function (who, numPoints) {
-    let msg = pretty.client(chat.getClient(who)) + " got the title";
+  this.correctTitle = function (who, numPoints, when, roll) {
+    let client = pretty.client(chat.getClient(who));
+    let msg = roll ?
+      "<a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" target=\"_blank\">" +
+      client + "</a>" : client;
+    msg += " got the title";
     if (numPoints) {
       let optionalS = numPoints == 1? "" : "s";
       msg += " (" + numPoints + " point" + optionalS + ")";
     }
-    entry("sys", msg + "!");
+    entry("sys relative", msg + "!", when);
     this.updateList();
   }
 
