@@ -145,14 +145,16 @@ module.exports = function () {
     // This is supposed to catch cases like 'Imagine - Radio Edit'.
     const dash_pos = correct_title.indexOf(' - ');
     if (dash_pos > 0) {
-      answers.push(normalize(correct_title.substring(0, dash_pos)));
+      answers = answers.concat(
+        generateCorrectAnswers(correct_title.substring(0, dash_pos)));
     }
 
     // Example where this is needed is the title 'dark horse feat juicy j'.
     // 'feat ..' parts are usually inside parenthesis, but not in this case.
     const feat_pos = normalized.indexOf(' feat ');
     if (feat_pos > 0) {
-      answers.push(normalized.substring(0, feat_pos));
+      answers = answers.concat(
+        generateCorrectAnswers(correct_title.substring(0, feat_pos)));
     }
 
     // Finds ( or [, and then includes everything until the matching ) or ].

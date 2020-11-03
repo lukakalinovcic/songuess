@@ -94,6 +94,8 @@ test('accepted pairs', () => {
   expect(check('Umoran sam', 'umoran sam prijatelju')).toBe(true);
   expect(check('U ljubav vjerujem', 'ja u ljubav vjerujem')).toBe(true);
   expect(check('Dalmatinac', 'dalmatinac sam')).toBe(true);
+  expect(check('The Sound of Silence - Acoustic Version', 'sound of silence'))
+    .toBe(true);
 });
 
 test('rejected pairs', () => {
