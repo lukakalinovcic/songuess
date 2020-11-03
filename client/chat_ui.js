@@ -73,9 +73,7 @@ function ChatUI(chat, user) {
   };
 
   this.calledIDontKnow = function (desc) {
-    if (!desc.implicitIdk) {
-      entry("sys", pretty.client(chat.getClient(desc.who)) + " calls /idk.");
-    }
+    entry("sys", pretty.client(chat.getClient(desc.who)) + " calls /idk.");
     if (desc.hasOwnProperty('answer')) {
       if (desc.state === "playon") {
         entry("sys wrong", " Moving on.");

@@ -15,10 +15,10 @@ exports.ChatRoom = function (desc, chat) {
     clients = {},
     localPersonData = {},
     numberOfClients = 0,
-    pointsAssigner = null,
+    // A dummy pointsAssigner, just to make sure it's never null.
+    pointsAssigner = new PointsAssigner({}, that),
     currentItem = null,
     hostSocket = null,
-
     // "dead", "playing", "playon", "after", "suspense"
     // if state is playing, when did the song start?
     // if state is suspense, when will the next song start?
@@ -28,7 +28,7 @@ exports.ChatRoom = function (desc, chat) {
       songStart : null,
       lastSong : null,
       lastScore : new Map(),
-      whoIdkVotes : new Map(),
+      whoIdkVotes : new Set(),
       hintShowed : false
     };
 
@@ -57,9 +57,7 @@ exports.ChatRoom = function (desc, chat) {
       return;
     }
 
-    if (pointsAssigner) {
-      pointsAssigner.giveArtistPoints();
-    }
+    pointsAssigner.giveArtistPoints();
 
     roomState.state = "after";
     roomState.songStart = null;
@@ -79,7 +77,7 @@ exports.ChatRoom = function (desc, chat) {
       setTimeout(function() {
         roomState.state = "playing";
         roomState.hintShowed = false;
-        roomState.whoIdkVotes = new Map();
+        roomState.whoIdkVotes = new Set();
         roomState.lastScore = new Map();
       }, Math.max(0, startTime - clock.clock()));
     });
@@ -130,7 +128,7 @@ exports.ChatRoom = function (desc, chat) {
     }
 
     if (roomState.state !== "playing" ||
-      (pointsAssigner && !pointsAssigner.gotAnswer(data, client))) {
+        !pointsAssigner.gotAnswer(data, client)) {
       that.broadcast('say', data);
     }
   }
@@ -163,9 +161,9 @@ exports.ChatRoom = function (desc, chat) {
   }
 
   // Returns whether the majority was reached.
-  // implicitIdk happens for example if you leave, or if you guess the title.
-  function checkForIdkVoteMajority(data, client, implicitIdk) {
-    if (roomState.whoIdkVotes.size >= 1 + Math.floor(numberOfClients / 2)) {
+  function checkForIdkVoteMajority(data, client) {
+    let stillGuessing = numberOfClients - pointsAssigner.getTitleWinnersSize();
+    if (roomState.whoIdkVotes.size >= 1 + Math.floor(stillGuessing / 2)) {
       // If state is playon, it means all the points have been assigned.
       // It doesn't make sense to show the hint in this case.
       if (roomState.hintShowed === false && roomState.state !== "playon") {
@@ -173,7 +171,6 @@ exports.ChatRoom = function (desc, chat) {
           who: client.id(),
           when: data.when,
           state: roomState.state,
-          implicitIdk: implicitIdk,
           hint: {
             title: calcHint(currentItem.title),
             artist: desc.artistPoints ?
@@ -181,24 +178,12 @@ exports.ChatRoom = function (desc, chat) {
           }
         });
         roomState.hintShowed = true;
-        // Remove the non-implicit votes.
-        // Implicit ones are coming from people who got the title right, and
-        // those should stay.
-        // NOTE: I'm reluctant to modify the map while I traverse it, so I use
-        // a temp var.
-        let newVotes = new Map();
-        for (const [k, v] of roomState.whoIdkVotes) {
-          if (v == 2) {
-            newVotes.set(k, v);
-          }
-        }
-        roomState.whoIdkVotes = newVotes;
+        roomState.whoIdkVotes = new Set();
       } else {
         that.broadcast('called_i_dont_know', {
           who: client.id(),
           when : data.when,
           state : roomState.state,
-          implicitIdk: implicitIdk,
           answer: currentItem
         });
         playNext();
@@ -214,12 +199,13 @@ exports.ChatRoom = function (desc, chat) {
     if (roomState.state !== "playing" && roomState.state !== "playon") {
       return;
     }
-    // Ignore if the person already voted.
-    if (roomState.whoIdkVotes.has(client.id())) {
+    // Ignore if the person already voted or already got title points.
+    if (roomState.whoIdkVotes.has(client.id()) ||
+        pointsAssigner.isTitleWinner(client)) {
       return;
     }
     // Mark the vote.
-    roomState.whoIdkVotes.set(client.id(), 1);
+    roomState.whoIdkVotes.add(client.id());
     // Let the others know.
     if (!checkForIdkVoteMajority(data, client)) {
       that.broadcast('called_i_dont_know', {
@@ -380,10 +366,11 @@ exports.ChatRoom = function (desc, chat) {
   this.leave = function (client, reason) {
     numberOfClients--;
 
-    // Pull this person's /idk vote back if any.
     roomState.whoIdkVotes.delete(client.id());
+    pointsAssigner.clientLeft(client);
+
     // Re-evaluate if we now have the majority for triggering an /idk event.
-    checkForIdkVoteMajority({when: clock.clock()}, client, /*implicitIdk=*/true);
+    checkForIdkVoteMajority({when: clock.clock()}, client);
 
     client.local('num', client.local('num') - 1);
     delete clients[client.id()];
@@ -395,9 +382,6 @@ exports.ChatRoom = function (desc, chat) {
         hostSocket.closeSocket();
         this.detachHostSocket();
       }
-    }
-    if (pointsAssigner) {
-      pointsAssigner.clientLeft(client);
     }
     this.broadcast('old_client', [client.id(), reason]);
   };
@@ -456,14 +440,10 @@ exports.ChatRoom = function (desc, chat) {
         who: client.id(),
         numPoints: numPoints
       });
-    // Guessing the title means the user should be counted against showing the
-    // hint or skipping the song (as if they called /idk).
+    // Guessing the title might trigger /idk, because the pool of people that
+    // are still guessing was decreased.
     } else if (!isRoundFinished) {
-      roomState.whoIdkVotes.set(client.id(), 2);
-      checkForIdkVoteMajority(
-        {when: clock.clock()},
-        client,
-        /*implicitIdk=*/true);
+      checkForIdkVoteMajority({when: clock.clock()}, client);
     }
   }
 };

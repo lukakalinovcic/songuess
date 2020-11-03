@@ -130,4 +130,8 @@ module.exports = function (currentItem, chatRoom) {
   this.getTitleWinnersSize = function() {
     return titleWinners.length;
   };
+
+  this.isTitleWinner = function(client) {
+    return clientPresent(titleWinners, client);
+  };
 };
