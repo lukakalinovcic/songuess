@@ -48,14 +48,6 @@ function ChatUI(chat, user) {
     }
   }
 
-  function songOffset() {
-    if (chat.getRoomState().state === "playing") {
-      return myClock.clock() - chat.getRoomState().songStart;
-    } else {
-      return null;
-    }
-  }
-
   this.clear = function () {
     $(body).empty();
   };
