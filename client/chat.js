@@ -137,17 +137,13 @@ function Chat(wsock, user, media, player, onFatal) {
   onCommand("help", function () {
     ui.addNotice("Available commands are ");
     ui.addNotice("- /clear, /join #room, /mute, /vol [0-10]");
-    ui.addNotice("- /sync, /reset, /who [#room], /group [0,1,2,...]");
+    ui.addNotice("- /sync, /reset, /group [0,1,2,...]");
     ui.addNotice("- /desc, /info, /idk");
     ui.addNotice("- /reset (will reset your score), /honor");
   });
 
   onCommand("hello", function () {
     ui.addNotice("hello to you too.");
-  });
-
-  onCommand("who", function (room) {
-    wsock.sendType("who", {when:myClock.clock(), room:room || null});
   });
 
   onCommand("info", function () {

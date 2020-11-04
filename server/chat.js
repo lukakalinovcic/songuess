@@ -22,18 +22,6 @@ exports.Chat = function () {
     }
   }
 
-  function onWho(data, client) {
-    var room, sol = {};
-    for (room in rooms) {
-      if (rooms.hasOwnProperty(room)) {
-        if (!(data.room && data.room !== room)) {
-          sol[room] = rooms[room].packWhoData();
-        }
-      }
-    }
-    client.send("who", sol);
-  }
-
   this.getRoomByName = function (name) {
     return rooms[name];
   };
@@ -94,10 +82,10 @@ exports.Chat = function () {
   };
 
   this.connect = function (wsock, user) {
-    var bio = false;
+    var been = false;
     wsock.onMessageType("initial_room", function (data) {
       var client, room;
-      if (bio) {
+      if (been) {
         return wsock.sendError("you call 'initial_room' successfuly only once.");
       }
       if (!that.roomNameExists(data)) {
@@ -106,10 +94,9 @@ exports.Chat = function () {
       // entering the room
       log(user.email + " initial room " + data);
       client = new ChatClient(wsock, user, that);
-      client.onMessage('who', onWho);
       where_is[client.id()] = rooms[data];
       rooms[data].enter(client);
-      bio = true;
+      been = true;
     });
     wsock.onMessageType("create_room", function (data) {
       wsock.sendType("create_room", that.createRoom(data.room));

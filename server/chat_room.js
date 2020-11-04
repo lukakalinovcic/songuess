@@ -26,7 +26,6 @@ exports.ChatRoom = function (desc, chat) {
     roomState = {
       state : "dead",
       songStart : null,
-      lastSong : null,
       lastScore : new Map(),
       whoIdkVotes : new Set(),
       hintShowed : false
@@ -378,24 +377,12 @@ exports.ChatRoom = function (desc, chat) {
     if (numberOfClients == 0) {
       roomState.state = "dead";
       roomState.songStart = null;
-      roomState.lastSong = null;
       if (hostSocket !== null) {
         hostSocket.closeSocket();
         this.detachHostSocket();
       }
     }
     this.broadcast('old_client', [client.id(), reason]);
-  };
-
-  this.packWhoData = function () {
-    let sol = {};
-    for (let id in clients) {
-      if (clients.hasOwnProperty(id)) {
-        let client = clients[id];
-        sol[ client.desc('display') ] = client.local('score');
-      }
-    }
-    return sol;
   };
 
   this.attachHostSocket = function(socket) {
