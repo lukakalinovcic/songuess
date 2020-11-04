@@ -489,3 +489,36 @@ test('more artist points than maxPoints', () => {
   expect(chatRoom.guessingDone).not.toBeCalled();
 });
 
+test('scoring after a client leaves is ok', () => {
+  let chatRoom = buildChatRoom({maxPoints: 3});
+  let pa = new PointsAssigner(ITEM, chatRoom);
+  let when = 1;
+
+  pa.gotAnswer({what: TITLE, when: when++}, CLIENT_1);
+  expect(chatRoom.grantScore).toBeCalledTimes(1);
+  expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 3, false, false);
+
+  pa.clientLeft(CLIENT_1);
+
+  pa.gotAnswer({what: TITLE, when: when++}, CLIENT_2);
+  expect(chatRoom.grantScore).toBeCalledTimes(2);
+  expect(chatRoom.grantScore).nthCalledWith(2, CLIENT_2, 2, false, false);
+});
+
+test('give answer, leave, come back, give answer again', () => {
+  let chatRoom = buildChatRoom({maxPoints: 3});
+  let pa = new PointsAssigner(ITEM, chatRoom);
+  let when = 1;
+
+  pa.gotAnswer({what: TITLE, when: when++}, CLIENT_1);
+  expect(chatRoom.grantScore).toBeCalledTimes(1);
+  expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 3, false, false);
+
+  pa.clientLeft(CLIENT_1);
+
+  pa.clientArrived(CLIENT_1);
+
+  pa.gotAnswer({what: TITLE, when: when++}, CLIENT_1);
+  expect(chatRoom.grantScore).toBeCalledTimes(1);
+});
+

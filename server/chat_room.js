@@ -359,6 +359,8 @@ exports.ChatRoom = function (desc, chat) {
         console.log('enter: currentAudioData is empty');
       }
     }
+
+    pointsAssigner.clientArrived(client);
   };
 
   // Pop a client from a list of clients and notify other clients.

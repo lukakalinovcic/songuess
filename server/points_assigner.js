@@ -8,12 +8,16 @@ module.exports = function (currentItem, chatRoom) {
     that = this,
     answerChecker = new AnswerChecker(),
     maxPoints = (chatRoom.desc && chatRoom.desc.maxPoints) || 1,
+    remainingTitlePoints = maxPoints,
     artistPoints = (chatRoom.desc && chatRoom.desc.artistPoints) || false,
     playOn = false,
     // These arrays contain client objects.
     // They are ordered, clients that come earlier should get more points.
-    titleWinners = [],
-    artistWinners = [];
+    titleWinners = new Set(),
+    artistWinners = [],
+    // This is used when a title winner leaves and comes back, in order to add
+    // them back to titleWinners.
+    allTitleWinners = new Set();
 
   function clientPresent(arr, client) {
     for (const c of arr) {
@@ -43,12 +47,12 @@ module.exports = function (currentItem, chatRoom) {
   function isRoundFinished() {
     const maxClientsToGetPoints = Math.min(maxPoints, chatRoom.getNumberOfClients());
     // If everyone got title points, we can close the round.
-    if (titleWinners.length == maxClientsToGetPoints ||
+    if (titleWinners.size == maxClientsToGetPoints ||
         // If everyone in the room got a title point besides one person, and
         // that person already has an artist point, we can also end the round.
         // That remaining person can't get more than 1 point, and no one else
         // can take that point away from them by guessing the title.
-        (titleWinners.length == chatRoom.getNumberOfClients() - 1 &&
+        (titleWinners.size == chatRoom.getNumberOfClients() - 1 &&
          artistWinners.length == 1)) {
       // Note that if there are 2 artist winners, the one which would've gotten
       // 1 point can still give a title answer and get 2 points instead of 1,
@@ -70,14 +74,15 @@ module.exports = function (currentItem, chatRoom) {
     }
 
     if (gotTitle) {
-      if (!clientPresent(titleWinners, client)) {
+      if (!titleWinners.has(client.id())) {
         // This is the case when a user first gets an artist right, but then also
         // gets the title. In this case we remove from artistWinners and append
         // to titleWinners.
         removeClient(artistWinners, client);
-        titleWinners.push(client);
+        titleWinners.add(client.id());
+        allTitleWinners.add(client.id());
         // Title points can't change later and can be awarded immediately.
-        broadcastData.numPoints = maxPoints - titleWinners.length + 1;
+        broadcastData.numPoints = remainingTitlePoints--;
         chatRoom.grantScore(
           client,
           broadcastData.numPoints,
@@ -89,7 +94,7 @@ module.exports = function (currentItem, chatRoom) {
       }
       chatRoom.broadcast('correct_title', broadcastData);
     } else if (gotArtist) {
-      if (!clientPresent(titleWinners, client) &&
+      if (!titleWinners.has(client.id()) &&
           !clientPresent(artistWinners, client)) {
         // Artist points could later become title points so they are not
         // awarded right away.
@@ -108,11 +113,13 @@ module.exports = function (currentItem, chatRoom) {
   // This should be called externally for example if the song has ended, or if
   // next was called before/ all the points were given out.
   this.giveArtistPoints = function () {
-    // Title points have already been awarded.
-    let points = maxPoints - titleWinners.length;
     for (const client of artistWinners) {
-      if (points > 0) {
-        chatRoom.grantScore(client, points--, /*artistScore=*/ true);
+      if (remainingTitlePoints > 0) {
+        chatRoom.grantScore(
+          client,
+          remainingTitlePoints--,
+          /*artistScore=*/ true
+        );
       }
     }
     // Just in case this is called twice.
@@ -120,18 +127,24 @@ module.exports = function (currentItem, chatRoom) {
   };
 
   this.clientLeft = function(client) {
-    removeClient(titleWinners, client);
+    titleWinners.delete(client.id());
     removeClient(artistWinners, client);
     if (isRoundFinished()) {
       chatRoom.guessingDone(playOn);
     }
   };
 
+  this.clientArrived = function(client) {
+    if (allTitleWinners.has(client.id())) {
+      titleWinners.add(client.id());
+    }
+  };
+
   this.getTitleWinnersSize = function() {
-    return titleWinners.length;
+    return titleWinners.size;
   };
 
   this.isTitleWinner = function(client) {
-    return clientPresent(titleWinners, client);
+    return titleWinners.has(client.id());
   };
 };
