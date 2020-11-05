@@ -21,7 +21,7 @@ module.exports = function (currentItem, chatRoom) {
 
   function clientPresent(arr, client) {
     for (const c of arr) {
-      if (c.id() == client.id()) {
+      if (c.pid() == client.pid()) {
         return true;
       }
     }
@@ -34,7 +34,7 @@ module.exports = function (currentItem, chatRoom) {
     let i = 0, j = 0;
     for (i = 0; i < arr.length; ++i) {
       arr[j] = arr[i];
-      if (arr[i].id() != client.id()) {
+      if (arr[i].pid() != client.pid()) {
         ++j;
       }
     }
@@ -67,20 +67,20 @@ module.exports = function (currentItem, chatRoom) {
     const gotTitle = answerChecker.checkAnswer(currentItem.title, answerData.what);
     const gotArtist = artistPoints && answerChecker.checkAnswer(currentItem.artist, answerData.what);
 
-    let broadcastData = {who: client.id(), when: answerData.when};
+    let broadcastData = {who: client.pid(), when: answerData.when};
 
     if (gotTitle || gotArtist) {
       playOn = playOn || (answerData.what.indexOf('#playon') != -1);
     }
 
     if (gotTitle) {
-      if (!titleWinners.has(client.id())) {
+      if (!titleWinners.has(client.pid())) {
         // This is the case when a user first gets an artist right, but then also
         // gets the title. In this case we remove from artistWinners and append
         // to titleWinners.
         removeClient(artistWinners, client);
-        titleWinners.add(client.id());
-        allTitleWinners.add(client.id());
+        titleWinners.add(client.pid());
+        allTitleWinners.add(client.pid());
         // Title points can't change later and can be awarded immediately.
         broadcastData.numPoints = remainingTitlePoints--;
         chatRoom.grantScore(
@@ -94,7 +94,7 @@ module.exports = function (currentItem, chatRoom) {
       }
       chatRoom.broadcast('correct_title', broadcastData);
     } else if (gotArtist) {
-      if (!titleWinners.has(client.id()) &&
+      if (!titleWinners.has(client.pid()) &&
           !clientPresent(artistWinners, client)) {
         // Artist points could later become title points so they are not
         // awarded right away.
@@ -127,7 +127,7 @@ module.exports = function (currentItem, chatRoom) {
   };
 
   this.clientLeft = function(client) {
-    titleWinners.delete(client.id());
+    titleWinners.delete(client.pid());
     removeClient(artistWinners, client);
     if (isRoundFinished()) {
       chatRoom.guessingDone(playOn);
@@ -135,8 +135,8 @@ module.exports = function (currentItem, chatRoom) {
   };
 
   this.clientArrived = function(client) {
-    if (allTitleWinners.has(client.id())) {
-      titleWinners.add(client.id());
+    if (allTitleWinners.has(client.pid())) {
+      titleWinners.add(client.pid());
     }
   };
 
@@ -145,6 +145,6 @@ module.exports = function (currentItem, chatRoom) {
   };
 
   this.isTitleWinner = function(client) {
-    return titleWinners.has(client.id());
+    return titleWinners.has(client.pid());
   };
 };

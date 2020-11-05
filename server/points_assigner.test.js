@@ -6,10 +6,10 @@ var
   TITLE = 'some title',
   ARTIST = 'some artist',
   ITEM = {title: TITLE, artist: ARTIST},
-  CLIENT_1 = {id: () => "1"},
-  CLIENT_2 = {id: () => "2"},
-  CLIENT_3 = {id: () => "3"},
-  CLIENT_4 = {id: () => "4"};
+  CLIENT_1 = {pid: () => "1"},
+  CLIENT_2 = {pid: () => "2"},
+  CLIENT_3 = {pid: () => "3"},
+  CLIENT_4 = {pid: () => "4"};
 
 function buildChatRoom(desc) {
   return {
@@ -311,7 +311,7 @@ test('maxPoints = 4, artist point becomes a title point', () => {
 });
 
 test('maxPoints = 5, big case', () => {
-  const CLIENT_5 = {id: () => "5"};
+  const CLIENT_5 = {pid: () => "5"};
 
   let chatRoom = buildChatRoom({maxPoints: 5, artistPoints: true});
   let pa = new PointsAssigner(ITEM, chatRoom);
