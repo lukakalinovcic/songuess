@@ -6,10 +6,10 @@ var
   TITLE = 'some title',
   ARTIST = 'some artist',
   ITEM = {title: TITLE, artist: ARTIST},
-  CLIENT_1 = {pid: () => "1"},
-  CLIENT_2 = {pid: () => "2"},
-  CLIENT_3 = {pid: () => "3"},
-  CLIENT_4 = {pid: () => "4"};
+  CLIENT_1 = {pid: () => "1", id: () => "a"},
+  CLIENT_2 = {pid: () => "2", id: () => "b"},
+  CLIENT_3 = {pid: () => "3", id: () => "c"},
+  CLIENT_4 = {pid: () => "4", id: () => "d"};
 
 function buildChatRoom(desc) {
   return {
@@ -311,7 +311,7 @@ test('maxPoints = 4, artist point becomes a title point', () => {
 });
 
 test('maxPoints = 5, big case', () => {
-  const CLIENT_5 = {pid: () => "5"};
+  const CLIENT_5 = {pid: () => "5", id: () => "e"};
 
   let chatRoom = buildChatRoom({maxPoints: 5, artistPoints: true});
   let pa = new PointsAssigner(ITEM, chatRoom);
@@ -444,7 +444,7 @@ test('broadcast works correctly, artistPoints: false', () => {
 
   expect(chatRoom.broadcast).toBeCalledTimes(1);
   expect(chatRoom.broadcast).nthCalledWith(1, 'correct_title', {
-    who: "1",
+    who: "a",
     when: 1,
     numPoints: 2
   });
@@ -460,12 +460,12 @@ test('broadcast works correctly, artistPoints: true', () => {
 
   expect(chatRoom.broadcast).toBeCalledTimes(2);
   expect(chatRoom.broadcast).nthCalledWith(1, 'correct_title', {
-    who: "1",
+    who: "a",
     when: 1,
     numPoints: 2
   });
   expect(chatRoom.broadcast).nthCalledWith(2, 'correct_artist', {
-    who: "2",
+    who: "b",
     when: 2
   });
 });

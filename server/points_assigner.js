@@ -67,7 +67,7 @@ module.exports = function (currentItem, chatRoom) {
     const gotTitle = answerChecker.checkAnswer(currentItem.title, answerData.what);
     const gotArtist = artistPoints && answerChecker.checkAnswer(currentItem.artist, answerData.what);
 
-    let broadcastData = {who: client.pid(), when: answerData.when};
+    let broadcastData = {who: client.id(), when: answerData.when};
 
     if (gotTitle || gotArtist) {
       playOn = playOn || (answerData.what.indexOf('#playon') != -1);
