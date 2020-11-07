@@ -74,7 +74,7 @@ exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHand
         if (messageType == 'startedStreaming') {
           roomReadyHandler();
         } else if (messageType == 'moveToNextSong') {
-          if (message.status == 'OK' && message.data.title) {
+          if (message.status == 'OK') {
             fetchedItem = message.data;
 
             // recorder.stop() has been called on the client at this point
@@ -97,7 +97,9 @@ exports.HostSocket = function (socket, chatRoom, roomReadyHandler, songEndedHand
         } else if (messageType == 'startPlaying') {
           if (doneHandler !== null) {
             if (message.status == 'OK') {
-              doneHandler(fetchedItem);
+              // The item was sent either here or previously with a
+              // moveToNextSong message.
+              doneHandler(message.data || fetchedItem);
             } else {
               doneHandler(null);
             }
