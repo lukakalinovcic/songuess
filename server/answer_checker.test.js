@@ -67,10 +67,6 @@ test('accepted pairs', () => {
   expect(check('The real slim shady', 'real slim shady')).toBe(true);
   expect(check('L-O-V-E', 'l-o-v-e')).toBe(true);
   expect(check('L-O-V-E', 'l o v e')).toBe(true);
-  expect(check('Schön', 'schoen')).toBe(true);
-  expect(check('Schlüssel', 'schluessel')).toBe(true);
-  expect(check('Zähne', 'zaehne')).toBe(true);
-  expect(check('Straße', 'strasse')).toBe(true);
   expect(check('Surfin U.S.A.', 'surfin u.s.a.')).toBe(true);
   expect(check('Surfin U.S.A.', 'surfin usa')).toBe(true);
   expect(check('Let It Be - Remastered 2009', 'let it be')).toBe(true);
@@ -98,6 +94,27 @@ test('accepted pairs', () => {
     .toBe(true);
 });
 
+test('german characters', () => {
+  // Motivating example.
+  expect(check('Björk', 'bjork')).toBe(true);
+
+  // Identical versions are of course accepted.
+  expect(check('Schön', 'schön')).toBe(true);
+  expect(check('Zähne', 'zähne')).toBe(true);
+  expect(check('Schlüssel', 'schlüssel')).toBe(true);
+  expect(check('Straße', 'straße')).toBe(true);
+  // Approximate spellings.
+  expect(check('Schön', 'schon')).toBe(true);
+  expect(check('Zähne', 'zahne')).toBe(true);
+  expect(check('Schlüssel', 'schlussel')).toBe(true);
+  expect(check('Straße', 'strasse')).toBe(true);
+  // Ideally we'd accept these as well, but it's not worth doing for now.
+  expect(check('Schön', 'schoen')).toBe(false);
+  expect(check('Zähne', 'zaehne')).toBe(false);
+  // This one is accepted by accident, because of edit distance.
+  expect(check('Schlüssel', 'schluessel')).toBe(true);
+});
+
 test('rejected pairs', () => {
   expect(check('7', '5')).toBe(false);
   expect(check('2+2=5', '')).toBe(false);
@@ -114,5 +131,4 @@ test('rejected pairs', () => {
   // Not sure who would spell it out like this, I'm including it here for
   // completion because we have it in positive cases above.
   expect(check('Surfin U.S.A.', 'surfin u s a')).toBe(false);
-  expect(check('Schön', 'Schon')).toBe(false);
 });
