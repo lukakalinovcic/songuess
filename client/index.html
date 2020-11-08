@@ -38,27 +38,41 @@
     <div class="layout media" style="display: none;">
       <form>
         <label>
-          Room name:
+          Room name
           <input id="name" type="text">
         </label>
         <label>
-          Room description:
+          Room description
           <input id="desc" type="text">
         </label>
+        <br><br>
         <!--<input id="stream_from_middle" type="checkbox">Play somewhere from the middle part<br>--!>
 
-        <label for="max_points">Max points awarded per song:</label>
+        <label for="max_points">Max points awarded per song</label>
         <select id="max_points" name="max_points">
           <option value="1">1</option>
           <option value="2">2</option>
           <option value="3">3</option>
           <option value="4">4</option>
           <option value="5">5</option>
-        </select><br>
+        </select>
+        <br>
 
         <label>
-          <input id="artist_points" type="checkbox">Award points for correct artist<br>
+          <input id="artist_points" type="checkbox"> Award points for correct artist
         </label>
+        <br><br>
+
+        <label for="playon_time">Keep playing each song at least this many seconds</label>
+        <br>
+        <select id="playon_time" name="playon_time">
+          <option value="0">0</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+          <option value="60">60</option>
+        </select>
+        <br><br>
 
         <label>
           <input id="submit" value="Create and join!" type="submit"/>

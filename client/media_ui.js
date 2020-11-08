@@ -13,14 +13,13 @@ function MediaUI(media) {
       if (roomName[0] !== '#') {
         roomName = '#' + roomName;
       }
-      const maxPoints = parseInt($("#max_points").val());
-      const artistPoints = $("#artist_points").prop('checked');
       media.handleNewRoom({
-        name : roomName,
-        desc : $("#desc").val(),
-        streamFromMiddle : false,  //$("#stream_from_middle").prop('checked')
-        maxPoints : maxPoints,
-        artistPoints : artistPoints
+        name: roomName,
+        desc: $("#desc").val(),
+        streamFromMiddle: false,  //$("#stream_from_middle").prop('checked')
+        maxPoints: parseInt($("#max_points").val()),
+        artistPoints: $("#artist_points").prop('checked'),
+        playonTime: parseInt($("#playon_time").val())
       }, function (err) {
         alert(err);
       });

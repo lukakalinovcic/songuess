@@ -38,7 +38,8 @@ exports.ChatRoom = function (desc, chat) {
         desc : desc.desc,
         streamFromMiddle: desc.streamFromMiddle,
         maxPoints: desc.maxPoints,
-        artistPoints: desc.artistPoints
+        artistPoints: desc.artistPoints,
+        playonTime: desc.playonTime
       },
       users : {},
       state : roomState
