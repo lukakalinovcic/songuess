@@ -19,6 +19,7 @@ exports.ChatRoom = function (desc, chat) {
     pointsAssigner = new PointsAssigner({}, that),
     currentItem = null,
     hostSocket = null,
+    playonTimeTimeout = null,
     // "dead", "playing", "playon", "after", "suspense"
     // if state is playing, when did the song start?
     // if state is suspense, when will the next song start?
@@ -52,12 +53,25 @@ exports.ChatRoom = function (desc, chat) {
     return sol;
   }
 
+  function cancelPlayonTimeTimer() {
+    if (playonTimeTimeout) {
+      clearTimeout(playonTimeTimeout);
+      playonTimeTimeout = null;
+    }
+  }
+
+  function startPlayonTimeTimer(callback) {
+    playonTimeTimeout = setTimeout(callback, desc.playonTime * 1000);
+  }
+
   function playNext() {
     if (hostSocket == null) {
       return;
     }
 
     pointsAssigner.giveArtistPoints();
+
+    cancelPlayonTimeTimer();
 
     roomState.state = "after";
     roomState.songStart = null;
@@ -79,6 +93,16 @@ exports.ChatRoom = function (desc, chat) {
         roomState.hintShowed = false;
         roomState.whoIdkVotes = new Set();
         roomState.lastScore = new Map();
+
+        if (desc.playonTime > 0) {
+          startPlayonTimeTimer(function() {
+            playonTimeTimeout = null;
+            if (roomState.state == "playon") {
+              info('Moving on after ' + desc.playonTime + ' seconds.');
+              playNext();
+            }
+          });
+        }
       }, Math.max(0, startTime - clock.clock()));
     });
   }
@@ -163,7 +187,10 @@ exports.ChatRoom = function (desc, chat) {
   // Returns whether the majority was reached.
   // implicitIdk happens for example if you leave, or if you guess the title.
   function checkForIdkVoteMajority(data, client, implicitIdk) {
-    let stillGuessing = numberOfClients - pointsAssigner.getTitleWinnersSize();
+    let stillGuessing = numberOfClients;
+    if (roomState.state !== "playon") {
+      stillGuessing -= pointsAssigner.getTitleWinnersSize();
+    }
     if (roomState.whoIdkVotes.size >= 1 + Math.floor(stillGuessing / 2)) {
       let idk_data = {
         who: client.id(),
@@ -171,7 +198,7 @@ exports.ChatRoom = function (desc, chat) {
         state: roomState.state,
         implicitIdk: implicitIdk
       };
-      // If state is playon, it means all the points have been assigned.
+      // If state is playon, it means all the points have been given out.
       // It doesn't make sense to show the hint in this case.
       if (roomState.hintShowed === false && roomState.state !== "playon") {
         idk_data.hint = {
@@ -200,7 +227,8 @@ exports.ChatRoom = function (desc, chat) {
     }
     // Ignore if the person already voted or already got title points.
     if (roomState.whoIdkVotes.has(client.id()) ||
-        pointsAssigner.isTitleWinner(client)) {
+        (roomState.state !== "playon" && pointsAssigner.isTitleWinner(client)))
+    {
       return;
     }
     // Mark the vote.
@@ -407,15 +435,26 @@ exports.ChatRoom = function (desc, chat) {
 
   // Called by the pointsAssigner.
   this.guessingDone = function (playOn) {
-    const next_state = playOn? "playon": "after";
+    const next_state = (playOn || playonTimeTimeout)? "playon": "after";
     roomState.state = next_state;
+
+    // This was an explicit playon because someone typed #playon.
+    // The song should not be skipped by the running playon timer in this case.
+    if (playOn) {
+      cancelPlayonTimeTimer();
+    }
 
     that.broadcast('guessing_done', {
       answer: currentItem,
       state: next_state
     });
 
-    if (next_state !== "playon") {
+    if (next_state === "playon") {
+      // We reset the existing /idk votes, we're in a different situation now.
+      // The song has been guessed, no more points, we just listen for some
+      // more.
+      roomState.whoIdkVotes = new Set();
+    } else {
       playNext();
     }
   }
