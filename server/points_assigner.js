@@ -11,6 +11,7 @@ module.exports = function (currentItem, chatRoom) {
     remainingTitlePoints = maxPoints,
     artistPoints = (chatRoom.desc && chatRoom.desc.artistPoints) || false,
     playOn = false,
+    roundDone = false,
     // These arrays contain client objects.
     // They are ordered, clients that come earlier should get more points.
     titleWinners = new Set(),
@@ -62,8 +63,17 @@ module.exports = function (currentItem, chatRoom) {
     return false;
   }
 
+  function guessingDone() {
+    roundDone = true;
+    chatRoom.guessingDone(playOn);
+  }
+
   // Returns whether this answer should be shown to everyone or not.
   this.gotAnswer = function (answerData, client) {
+    if (roundDone) {
+      return true;
+    }
+
     const gotTitle = answerChecker.checkAnswer(currentItem.title, answerData.what);
     const gotArtist = artistPoints && answerChecker.checkAnswer(currentItem.artist, answerData.what);
 
@@ -104,7 +114,7 @@ module.exports = function (currentItem, chatRoom) {
     }
 
     if (isRoundFinished()) {
-      chatRoom.guessingDone(playOn);
+      guessingDone();
     }
 
     return gotTitle || gotArtist;
@@ -130,7 +140,7 @@ module.exports = function (currentItem, chatRoom) {
     titleWinners.delete(client.pid());
     removeClient(artistWinners, client);
     if (isRoundFinished()) {
-      chatRoom.guessingDone(playOn);
+      guessingDone();
     }
   };
 

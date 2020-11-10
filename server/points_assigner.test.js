@@ -522,3 +522,20 @@ test('give answer, leave, come back, give answer again', () => {
   expect(chatRoom.grantScore).toBeCalledTimes(1);
 });
 
+test('give answer, guessing done, another answer', () => {
+  // This case can happen when playOn is active.
+  let chatRoom = buildChatRoom({maxPoints: 1});
+  let pa = new PointsAssigner(ITEM, chatRoom);
+  let when = 1;
+
+  pa.gotAnswer({what: TITLE, when: when++}, CLIENT_1);
+  expect(chatRoom.grantScore).toBeCalledTimes(1);
+  expect(chatRoom.grantScore).nthCalledWith(1, CLIENT_1, 1, false, true);
+
+  expect(chatRoom.guessingDone).toBeCalledTimes(1);
+  expect(chatRoom.guessingDone).toBeCalledWith(/*playon=*/false);
+
+  pa.gotAnswer({what: TITLE, when: when++}, CLIENT_2);
+  expect(chatRoom.grantScore).toBeCalledTimes(1);
+});
+
