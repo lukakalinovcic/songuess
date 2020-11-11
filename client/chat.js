@@ -123,6 +123,17 @@ function Chat(wsock, user, media, player, onFatal) {
     wsock.sendType("change_group", {when:myClock.clock(), group:target});
   });
 
+  onCommand("groupify", function(target) {
+    if (target === undefined) {
+      return ui.addNotice("Use /groupify {0, 1, 2, ...}.");
+    }
+    target = Math.floor(Number(target));
+    if (target < 0 || target > 10) {
+      throw "Too many groups given.";
+    }
+    wsock.sendType("groupify", {numGroups: target});
+  });
+
   onCommand("mute", function () {
     ui.addNotice(player.toggleMute() ?
                  "Sound turned off." : "Sound turned on.");

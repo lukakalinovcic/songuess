@@ -6,7 +6,8 @@ var
   Syncer = require('./syncer.js').Syncer,
   PointsAssigner = require('./points_assigner.js'),
   mediaAuthenticator = new (require('./auth.js').MediaAuthenticator)(),
-  HostSocket = require('./host_socket.js').HostSocket;
+  HostSocket = require('./host_socket.js').HostSocket,
+  Groupify = require('./groupifier.js').Groupify;
 
 exports.ChatRoom = function (desc, chat) {
 
@@ -320,6 +321,12 @@ exports.ChatRoom = function (desc, chat) {
     });
   }
 
+  function onGroupify(data) {
+    for (let assignment in Groupify(clients, data.numGroups)) {
+      onChangeGroup({group: assignment.group}, assignment.client);
+    }
+  }
+
   this.desc = desc;
 
   this.broadcast = function (type, msg, except) {
@@ -376,6 +383,7 @@ exports.ChatRoom = function (desc, chat) {
     client.onMessage('honor', onHonor);
     client.onMessage('sync_start', onStartSync);
     client.onMessage('change_group', onChangeGroup);
+    client.onMessage('groupify', onGroupify);
 
     if (hostSocket === null) {
       console.log('enter: hostSocket is null');
