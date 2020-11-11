@@ -73,7 +73,6 @@ exports.ChatClient = function (wsock, user, chat) {
       id      : this.id(),
       name    : this.desc('name'),
       display : this.desc('display'),
-      gender  : this.desc('gender'),
       picture : this.desc('picture'),
       ping    : this.desc('ping'),
       score   : this.local('score'),

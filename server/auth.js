@@ -46,7 +46,6 @@ function fetchProfile(token, done) {
           email: user.email,
           name: user.given_name,
           display: user.name,
-          gender: user.gender,
           picture: user.picture
         });
       }
