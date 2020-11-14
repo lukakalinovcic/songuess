@@ -28,7 +28,7 @@ exports.Groupify = function (clients, numGroups) {
 
   let rec = function(i) {
     // Check if we've seen the same set of scores in a different assignment.
-    const key = scores.toString();
+    const key = [...scores].sort().toString();
     if (seenScores.has(key)) {
       return;
     } else {
