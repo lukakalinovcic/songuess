@@ -2,27 +2,72 @@
 "use strict";
 
 exports.Groupify = function (clients, numGroups) {
-  // clients is an object, keys are client IDs, values are chat_client.js objects.
-  // relevant parts of the chat_client.js object:
-  //   - client.id() -> id, also used as a key in the given map-object
-  //   - client.local('group') -> integer containing the current group (0 if no group)
-  //   - client.local('score') -> current score
-  //
-  // numGroups is the requested number of groups.
-  //
-  // the function should move all the clients that are currently not in any
-  // group to a new or existing group, so that after all the moves:
-  //   - exactly numGroups groups exist
-  //   - sum of scores between the groups is as close as possible
-  //     (up to you how exactly to define this)
-  //
-  // return value should be an array of assignment objects
-  // each assignment object should be of type {
-  //   client: the client object,
-  //   group: an integer, new group assignment for this client
-  // }
-  //
+  function getScore(client) {
+    return client.local('score') * 2 + 1;
+  }
 
-  return [];
+  let scores = new Array(numGroups).fill(0);
+  let unassigned = new Array();
+  for (const client of Object.values(clients)) {
+    const group = client.local('group');
+    if (group == 0) {
+      unassigned.push(client);
+    } else {
+      scores[group - 1] += getScore(client);
+    }
+  }
+
+  const n = unassigned.length;
+  let minLoss = 1e10;
+  let bestAssignment = null;
+  let currAssignment = new Array();
+
+  let seenScores = new Set();
+  let totalIters = 0;
+  let itersAtDepth = new Array(n).fill(0);
+
+  let rec = function(i) {
+    // Check if we've seen the same set of scores in a different assignment.
+    const key = scores.toString();
+    if (seenScores.has(key)) {
+      return;
+    } else {
+      seenScores.add(key);
+    }
+
+    if (i == n) {
+      // Everybody assigned, check if this is the best assignment.
+      const loss = Math.max(...scores) - Math.min(...scores);
+      if (loss < minLoss) {
+        minLoss = loss;
+        bestAssignment = [...currAssignment];
+      }
+    } else {
+      // Take a greedy step if the computation seems to be expensive.
+      totalIters += 1;
+      itersAtDepth[i] += 1;
+      const doGreedy = (totalIters >= 1000000) || (itersAtDepth[i] > 10000);
+
+      const lo = doGreedy ? scores.indexOf(Math.min(...scores)) : 0;
+      const hi = doGreedy ? lo + 1 : numGroups;
+      for (let group = lo; group < hi; ++group) {
+        currAssignment.push(group);
+        scores[group] += getScore(unassigned[i]);
+        rec(i + 1);
+        scores[group] -= getScore(unassigned[i]);
+        currAssignment.pop(group);
+      }
+    }
+  };
+  rec(0);
+
+  let result = new Array();
+  for (let i = 0; i < n; ++i) {
+    result.push({
+      client: unassigned[i],
+      group: bestAssignment[i] + 1
+    });
+  } 
+  return result;
 };
 
