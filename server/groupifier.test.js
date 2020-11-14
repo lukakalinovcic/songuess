@@ -53,7 +53,7 @@ test('50 clients 10 groups', () => {
   for (let assignment of result) {
     groupSize[assignment.group - 1] += 1;
   }
-  expect(Math.max(...groupSize) == Math.min(...groupSize) + 1);
+  expect(Math.max(...groupSize)).toEqual(Math.min(...groupSize));
 });
 
 
